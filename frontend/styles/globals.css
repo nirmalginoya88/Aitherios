@@ -1,0 +1,144 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── CSS Variables ──────────────────────────────────────────── */
+:root {
+  --glass-bg: rgba(255, 255, 255, 0.04);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-bg-hover: rgba(255, 255, 255, 0.07);
+  --red-glow: rgba(255, 0, 0, 0.4);
+  --red-glow-sm: rgba(255, 0, 0, 0.2);
+}
+
+/* ─── Base ───────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  background-color: #000000;
+  color: #ffffff;
+  font-family: 'Inter', sans-serif;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+/* ─── Custom Scrollbar ───────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0a0a0a;
+}
+::-webkit-scrollbar-thumb {
+  background: #3a3a3a;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #FF0000;
+}
+
+/* ─── Utility Classes ────────────────────────────────────────── */
+.glass {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.glass-hover:hover {
+  background: var(--glass-bg-hover);
+}
+
+.glow-text {
+  text-shadow: 0 0 20px rgba(255, 0, 0, 0.6);
+}
+
+.glow-border {
+  box-shadow: 0 0 0 1px rgba(255, 0, 0, 0.5), 0 0 20px rgba(255, 0, 0, 0.2);
+}
+
+.grid-bg {
+  background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, #ffffff 0%, #888888 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-red {
+  background: linear-gradient(135deg, #FF0000 0%, #ff6060 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ─── Shimmer Skeleton ───────────────────────────────────────── */
+.skeleton {
+  background: linear-gradient(90deg, #1a1a1a 25%, #2a2a2a 50%, #1a1a1a 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.8s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* ─── Floating animation ─────────────────────────────────────── */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-12px); }
+}
+
+.animate-float { animation: float 4s ease-in-out infinite; }
+.animate-float-slow { animation: float 6s ease-in-out infinite; }
+.animate-float-fast { animation: float 2.5s ease-in-out infinite; }
+
+/* ─── Neon glow pulse ────────────────────────────────────────── */
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 10px rgba(255,0,0,0.3); }
+  50%       { box-shadow: 0 0 35px rgba(255,0,0,0.75); }
+}
+
+.animate-pulse-glow { animation: pulse-glow 2.5s ease-in-out infinite; }
+
+/* ─── Page transitions ───────────────────────────────────────── */
+.page-enter {
+  opacity: 0;
+  transform: translateY(10px);
+}
+.page-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 300ms, transform 300ms;
+}
+
+/* ─── No scrollbar utility ───────────────────────────────────── */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ─── Selection ──────────────────────────────────────────────── */
+::selection {
+  background: rgba(255, 0, 0, 0.3);
+  color: #ffffff;
+}
