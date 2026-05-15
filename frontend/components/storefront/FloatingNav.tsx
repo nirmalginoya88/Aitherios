@@ -158,16 +158,12 @@ export default function FloatingNav({ cart, onCartUpdate }: FloatingNavProps) {
         <AnimatePresence>
           {searchOpen && (
             <>
+              {/* Total Blackout Overlay */}
               <motion.div 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="fixed inset-0 z-[1000] bg-black/90"
-                style={{ 
-                  backdropFilter: 'blur(60px) saturate(180%)', 
-                  WebkitBackdropFilter: 'blur(60px) saturate(180%)',
-                  transform: 'translateZ(0)' 
-                }}
+                className="fixed inset-0 z-[1000] bg-black"
                 onClick={() => setSearchOpen(false)}
               />
               
@@ -176,7 +172,7 @@ export default function FloatingNav({ cart, onCartUpdate }: FloatingNavProps) {
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: -64, opacity: 0 }}
                 transition={{ duration: 0.3, ease: 'easeOut' }}
-                className="fixed top-16 left-0 right-0 z-[1001] bg-obsidian-900 border-b-2 border-crimson-500 shadow-2xl"
+                className="fixed top-16 left-0 right-0 z-[1001] bg-white/5 backdrop-blur-2xl border-b border-white/10 shadow-2xl"
                 style={{ transform: 'translateZ(0)' }}
               >
                 <div className="max-w-7xl mx-auto px-6 h-20 flex items-center gap-4">
