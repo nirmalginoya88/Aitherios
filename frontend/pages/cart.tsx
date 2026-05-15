@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import FloatingNav from '@/components/storefront/FloatingNav';
 import Footer from '@/components/storefront/Footer';
-import { CartItem } from '@/lib/mock-data';
+import { CartItem } from '@/types';
 import Button from '@/components/ui/Button';
 import { Input } from '@/components/ui/FormElements';
 import { fadeUp, staggerContainer, scalePop } from '@/lib/motion-variants';

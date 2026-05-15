@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import Badge from '@/components/ui/Badge';
-import { Customer, Order } from '@/lib/mock-data';
+import { Customer, Order } from '@/types';
 import api from '@/lib/api';
 import { staggerContainer, fadeUp, scalePop, overlayFade } from '@/lib/motion-variants';
 import { useEffect } from 'react';

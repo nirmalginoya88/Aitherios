@@ -7,7 +7,7 @@ import FloatingNav from '@/components/storefront/FloatingNav';
 import Footer from '@/components/storefront/Footer';
 import ProductCard from '@/components/storefront/ProductCard';
 import { ProductCardSkeleton } from '@/components/ui/Skeleton';
-import { Product, CartItem } from '@/lib/mock-data';
+import { Product, CartItem } from '@/types';
 import api from '@/lib/api';
 import { staggerContainer, fadeUp, slideLeft } from '@/lib/motion-variants';
 

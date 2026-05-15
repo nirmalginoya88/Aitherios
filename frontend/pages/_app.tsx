@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { AuthProvider } from '@/lib/auth';
 import '@/styles/globals.css';
-import { CartItem } from '@/lib/mock-data';
+import { CartItem } from '@/types';
 import { pageTransition } from '@/lib/motion-variants';
 
 export default function App({ Component, pageProps, router }: AppProps) {

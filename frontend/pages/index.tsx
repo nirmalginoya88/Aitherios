@@ -10,7 +10,7 @@ import FloatingNav from '@/components/storefront/FloatingNav';
 import Footer from '@/components/storefront/Footer';
 import ProductCard from '@/components/storefront/ProductCard';
 import { ProductCardSkeleton } from '@/components/ui/Skeleton';
-import { Product, CartItem } from '@/lib/mock-data';
+import { Product, CartItem } from '@/types';
 import api from '@/lib/api';
 import { fadeUp, staggerContainer, slideLeft, slideRight } from '@/lib/motion-variants';
 
@@ -33,7 +33,7 @@ export default function Home({ cart, onCartUpdate, addToCart }: HomeProps) {
   const heroRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: heroRef });
   const heroY = useTransform(scrollYProgress, [0, 1], ['0%', '40%']);
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 1]); // Stay visible
 
   const [featured, setFeatured] = useState<Product[]>([]);
   const [gridProducts, setGridProducts] = useState<Product[]>([]);
@@ -153,23 +153,33 @@ export default function Home({ cart, onCartUpdate, addToCart }: HomeProps) {
             </motion.div>
 
             {/* Floating Product Cards */}
-            <div className="relative h-[300px] sm:h-[400px] lg:h-[500px]">
+            <motion.div 
+              style={{ y: heroY, opacity: heroOpacity }}
+              className="relative h-[400px] sm:h-[450px] lg:h-[500px]"
+            >
               {HERO_FLOATING_PRODUCTS.map((product, i) => {
                 const positions = [
-                  { top: '5%', left: '20%', rotate: -6, delay: 0 },
-                  { top: '25%', right: '5%', rotate: 4, delay: 0.15 },
-                  { bottom: '5%', left: '5%', rotate: -3, delay: 0.3 },
+                  { top: '5%', left: '15%', rotate: -6, delay: 0 },
+                  { top: '35%', right: '5%', rotate: 4, delay: 0.15 },
+                  { bottom: '5%', left: '5%', rotate: -3, delay: 0.3, hideOnMobile: true },
                 ];
                 const pos = positions[i];
                 if (!product) return null;
                 return (
                   <motion.div
                     key={product.id || i}
+                    className={`absolute w-40 lg:w-52 glass rounded-2xl overflow-hidden shadow-card cursor-pointer hover:shadow-glow transition-shadow duration-300 ${pos.hideOnMobile ? 'hidden sm:block' : ''}`}
+                    style={{ 
+                      top: pos.top, 
+                      left: pos.left, 
+                      right: pos.right, 
+                      bottom: pos.bottom,
+                      rotate: pos.rotate 
+                    }}
                     initial={{ opacity: 0, y: 30 }}
                     animate={{
                       opacity: 1,
                       y: [0, -12, 0],
-                      rotate: pos.rotate,
                     }}
                     transition={{
                       opacity: { duration: 0.6, delay: pos.delay },
@@ -180,8 +190,6 @@ export default function Home({ cart, onCartUpdate, addToCart }: HomeProps) {
                         delay: pos.delay,
                       },
                     }}
-                    className="absolute w-40 lg:w-52 glass rounded-2xl overflow-hidden shadow-card cursor-pointer hover:shadow-glow transition-shadow duration-300"
-                    style={{ ...pos }}
                     whileHover={{ scale: 1.06, rotate: 0, zIndex: 10 }}
                   >
                     <div className="relative h-36">

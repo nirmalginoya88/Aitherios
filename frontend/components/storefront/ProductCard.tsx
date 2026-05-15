@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { Heart, Star, ShoppingBag, Eye } from 'lucide-react';
-import { Product, CartItem } from '@/lib/mock-data';
+import { Product, CartItem } from '@/types';
 import Badge from '../ui/Badge';
 import { floatCard } from '@/lib/motion-variants';
 

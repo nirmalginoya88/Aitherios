@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ShoppingBag, Menu, X, Search, User, Zap } from 'lucide-react';
 import { drawerSlide, overlayFade, fadeIn } from '@/lib/motion-variants';
 import CartDrawer from './CartDrawer';
-import { CartItem } from '@/lib/mock-data';
+import { CartItem } from '@/types';
 
 const NAV_LINKS = [
   { href: '/products', label: 'Shop' },

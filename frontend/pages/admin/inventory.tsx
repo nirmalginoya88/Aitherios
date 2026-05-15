@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import Badge from '@/components/ui/Badge';
-import { Product } from '@/lib/mock-data';
+import { Product } from '@/types';
 import api from '@/lib/api';
 import { staggerContainer, fadeUp, scalePop, drawerSlide, overlayFade } from '@/lib/motion-variants';
 import { TableRowSkeleton } from '@/components/ui/Skeleton';

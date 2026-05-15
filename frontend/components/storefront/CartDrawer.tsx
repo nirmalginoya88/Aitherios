@@ -3,7 +3,7 @@ import { X, Plus, Minus, ShoppingBag, Trash2, ArrowRight } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { drawerSlide, overlayFade, fadeUp } from '@/lib/motion-variants';
-import { CartItem } from '@/lib/mock-data';
+import { CartItem } from '@/types';
 import Button from '../ui/Button';
 
 interface CartDrawerProps {

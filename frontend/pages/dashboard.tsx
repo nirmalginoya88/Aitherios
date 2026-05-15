@@ -8,11 +8,12 @@ import {
 } from 'lucide-react';
 import FloatingNav from '@/components/storefront/FloatingNav';
 import Footer from '@/components/storefront/Footer';
-import { MOCK_PRODUCTS, CartItem } from '@/lib/mock-data';
+import { CartItem } from '@/types';
 import Badge from '@/components/ui/Badge';
 import { fadeUp, staggerContainer, scalePop } from '@/lib/motion-variants';
 import Image from 'next/image';
 import { useAuth } from '@/lib/auth';
+import { useRouter } from 'next/router';
 import api from '@/lib/api';
 import { Skeleton, ProductCardSkeleton } from '@/components/ui/Skeleton';
 
@@ -35,7 +36,7 @@ const STATUS_VARIANT: Record<string, 'success' | 'info' | 'warning' | 'danger' |
 
 const STATUS_STEPS = ['Ordered', 'Processing', 'Shipped', 'Delivered'];
 
-const WISHLIST_PRODUCTS = MOCK_PRODUCTS.slice(3, 7);
+const WISHLIST_PRODUCTS: any[] = []; // Will be fetched from API
 
 interface DashboardProps {
   cart: CartItem[];
@@ -44,7 +45,8 @@ interface DashboardProps {
 }
 
 export default function Dashboard({ cart, onCartUpdate, addToCart }: DashboardProps) {
-  const { user, isLoading: authLoading, setShowAuthModal } = useAuth();
+  const router = useRouter();
+  const { user, isLoading: authLoading } = useAuth();
   const [tab, setTab] = useState<DashboardTab>('orders');
   
   const [userOrders, setUserOrders] = useState<any[]>([]);
@@ -53,9 +55,9 @@ export default function Dashboard({ cart, onCartUpdate, addToCart }: DashboardPr
 
   useEffect(() => {
     if (!authLoading && !user) {
-      setShowAuthModal(true);
+      router.push('/login');
     }
-  }, [user, authLoading, setShowAuthModal]);
+  }, [user, authLoading, router]);
 
   useEffect(() => {
     if (user) {

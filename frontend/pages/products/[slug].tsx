@@ -13,7 +13,7 @@ import Footer from '@/components/storefront/Footer';
 import ProductCard from '@/components/storefront/ProductCard';
 import { Skeleton, ProductCardSkeleton } from '@/components/ui/Skeleton';
 import Badge from '@/components/ui/Badge';
-import { Product, CartItem } from '@/lib/mock-data';
+import { Product, CartItem } from '@/types';
 import api from '@/lib/api';
 import { fadeUp, staggerContainer, slideLeft } from '@/lib/motion-variants';
 

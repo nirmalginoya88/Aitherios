@@ -24,14 +24,13 @@ import { useAuth } from '@/lib/auth';
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
-  const { user, isLoading: authLoading, setShowAuthModal } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
 
   useEffect(() => {
     if (!authLoading && !user) {
-      setShowAuthModal(true);
-      router.push('/'); // Redirect non-admins out of admin layout immediately
+      router.push('/login'); // Redirect to login page instead of modal
     }
-  }, [user, authLoading, setShowAuthModal, router]);
+  }, [user, authLoading, router]);
 
   if (authLoading || !user) {
     return (

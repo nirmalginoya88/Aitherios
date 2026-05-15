@@ -31,7 +31,7 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401 && typeof window !== 'undefined') {
-      // Clear token and reload to trigger AuthModal
+      // Clear token and reload to trigger redirection
       localStorage.removeItem('token');
       window.dispatchEvent(new Event('auth-unauthorized'));
     }

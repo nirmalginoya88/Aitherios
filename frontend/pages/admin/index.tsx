@@ -10,7 +10,7 @@ import {
 } from 'recharts';
 import { useState, useEffect } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
-import { MOCK_ANALYTICS } from '@/lib/mock-data';
+import { AnalyticsData } from '@/types';
 import api from '@/lib/api';
 import { staggerContainer, fadeUp, scalePop } from '@/lib/motion-variants';
 import { ChartSkeleton } from '@/components/ui/Skeleton';
@@ -82,8 +82,6 @@ export default function AdminDashboard() {
         setData(res.data);
       } catch (err) {
         console.error('Failed to fetch analytics', err);
-        // Fallback to mock data if API fails to keep UI functional for now
-        setData(MOCK_ANALYTICS);
       } finally {
         setLoading(false);
       }

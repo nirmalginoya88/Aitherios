@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
-import AuthModal from '@/components/auth/AuthModal';
 
 interface UserPayload {
   id: string;
@@ -26,13 +25,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<UserPayload | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [showAuthModal, setShowAuthModal] = useState(false);
 
   useEffect(() => {
     const initAuth = () => {
-      const storedToken = localStorage.getItem('token');
-      if (storedToken) {
-        try {
+      try {
+        const storedToken = localStorage.getItem('token');
+        if (storedToken) {
           const decoded = jwtDecode<UserPayload>(storedToken);
           // Check if expired
           if (decoded.exp && decoded.exp * 1000 < Date.now()) {
@@ -41,11 +39,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setToken(storedToken);
             setUser(decoded);
           }
-        } catch (error) {
-          logout();
         }
+      } catch (error) {
+        logout();
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     };
 
     initAuth();
@@ -53,7 +52,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Listen to global 401 errors from Axios
     const handleUnauthorized = () => {
       logout();
-      setShowAuthModal(true);
+      // Instead of showing modal, we let the pages handle redirection
     };
     window.addEventListener('auth-unauthorized', handleUnauthorized);
     return () => window.removeEventListener('auth-unauthorized', handleUnauthorized);
@@ -65,7 +64,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const decoded = jwtDecode<UserPayload>(newToken);
       setUser(decoded);
-      setShowAuthModal(false);
     } catch (err) {
       console.error('Invalid token on login', err);
     }
@@ -78,9 +76,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, isLoading, login, logout, showAuthModal, setShowAuthModal }}>
+    <AuthContext.Provider value={{ user, token, isLoading, login, logout, showAuthModal: false, setShowAuthModal: () => {} }}>
       {children}
-      {showAuthModal && <AuthModal />}
     </AuthContext.Provider>
   );
 }
