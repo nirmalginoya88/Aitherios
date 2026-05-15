@@ -161,10 +161,10 @@ export default function FloatingNav({ cart, onCartUpdate }: FloatingNavProps) {
               {/* High-Performance Motion Blur Overlay */}
               <motion.div 
                 initial={{ opacity: 0, backdropFilter: 'blur(0px)' }}
-                animate={{ opacity: 1, backdropFilter: 'blur(40px)' }}
+                animate={{ opacity: 1, backdropFilter: 'blur(80px)' }}
                 exit={{ opacity: 0, backdropFilter: 'blur(0px)' }}
                 className="fixed inset-0 z-[999] bg-black/70"
-                style={{ WebkitBackdropFilter: 'blur(40px)' }}
+                style={{ WebkitBackdropFilter: 'blur(80px)' }}
                 onClick={() => setSearchOpen(false)}
               />
               
