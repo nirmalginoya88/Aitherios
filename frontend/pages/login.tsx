@@ -37,7 +37,7 @@ export default function LoginPage() {
       login(res.data.token);
       router.push('/dashboard');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Authentication failed. Please try again.');
+      setError(err.response?.data?.error || err.response?.data?.message || 'Authentication failed. Please try again.');
     } finally {
       setLoading(false);
     }

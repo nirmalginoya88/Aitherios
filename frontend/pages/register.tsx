@@ -34,11 +34,16 @@ export default function RegisterPage() {
     setError('');
 
     try {
-      const res = await api.post('/auth/register', { name, email, password });
+      // Split full name into firstName and lastName
+      const nameParts = name.trim().split(' ');
+      const firstName = nameParts[0] || name;
+      const lastName = nameParts.slice(1).join(' ') || nameParts[0]; // fallback to firstName if no last name
+
+      const res = await api.post('/auth/register', { firstName, lastName, email, password });
       login(res.data.token);
       router.push('/dashboard');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Registration failed. Please try again.');
+      setError(err.response?.data?.error || err.response?.data?.message || 'Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }
