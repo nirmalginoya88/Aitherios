@@ -36,8 +36,8 @@ export default function RegisterPage() {
     try {
       // Split full name into firstName and lastName
       const nameParts = name.trim().split(' ');
-      const firstName = nameParts[0] || name;
-      const lastName = nameParts.slice(1).join(' ') || nameParts[0]; // fallback to firstName if no last name
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
 
       const res = await api.post('/auth/register', { firstName, lastName, email, password });
       login(res.data.token);
