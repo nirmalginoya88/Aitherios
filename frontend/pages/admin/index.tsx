@@ -18,29 +18,29 @@ import { ChartSkeleton } from '@/components/ui/Skeleton';
 const getKpiCards = (kpis: any) => [
   {
     label: 'Total Revenue',
-    value: `$${(kpis.totalRevenue / 1000).toFixed(1)}K`,
-    growth: kpis.revenueGrowth,
+    value: `$${((kpis?.totalRevenue || 0) / 1000).toFixed(1)}K`,
+    growth: kpis?.revenueGrowth || 0,
     icon: <DollarSign size={20} />,
     color: 'crimson',
   },
   {
     label: 'Total Orders',
-    value: kpis.totalOrders?.toLocaleString(),
-    growth: kpis.ordersGrowth,
+    value: (kpis?.totalOrders || 0).toLocaleString(),
+    growth: kpis?.ordersGrowth || 0,
     icon: <ShoppingCart size={20} />,
     color: 'blue',
   },
   {
     label: 'Visitors',
-    value: `${(kpis.totalVisitors / 1000).toFixed(1)}K`,
-    growth: kpis.visitorsGrowth,
+    value: `${((kpis?.totalVisitors || 0) / 1000).toFixed(1)}K`,
+    growth: kpis?.visitorsGrowth || 0,
     icon: <Users size={20} />,
     color: 'purple',
   },
   {
     label: 'Conversion',
-    value: `${kpis.conversionRate}%`,
-    growth: kpis.conversionGrowth,
+    value: `${kpis?.conversionRate || 0}%`,
+    growth: kpis?.conversionGrowth || 0,
     icon: <Activity size={20} />,
     color: 'emerald',
   },
@@ -109,7 +109,7 @@ export default function AdminDashboard() {
     );
   }
 
-  const { kpis, revenue, orders, topProducts, trafficSources } = data;
+  const { kpis = {}, revenue = [], orders = [], topProducts = [], trafficSources = [] } = data;
   const KPI_CARDS = getKpiCards(kpis);
 
   return (
