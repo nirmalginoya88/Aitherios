@@ -3,7 +3,8 @@ import { jwtDecode } from 'jwt-decode';
 
 interface UserPayload {
   id: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   role: 'user' | 'admin';
   exp?: number;

@@ -116,11 +116,11 @@ export default function Dashboard({ cart, onCartUpdate, addToCart }: DashboardPr
             <motion.div variants={fadeUp} className="flex items-center gap-5">
               {/* Avatar */}
               <div className="w-16 h-16 rounded-2xl bg-crimson-500/10 border border-crimson-500/20 flex items-center justify-center font-display font-bold text-2xl text-crimson-400">
-                {user ? user.name.substring(0, 2).toUpperCase() : '??'}
+                {user ? `${user.firstName[0]}${user.lastName?.[0] || ''}`.toUpperCase() : '??'}
               </div>
               <div>
                 <h1 className="font-display font-bold text-3xl text-white">
-                  {user ? user.name : 'Welcome'}
+                  {user ? `${user.firstName} ${user.lastName}` : 'Welcome'}
                 </h1>
                 <p className="text-steel-300 text-sm">
                   {user ? user.email : 'Please login'} · {user?.role === 'admin' ? 'Admin' : 'Member'}
