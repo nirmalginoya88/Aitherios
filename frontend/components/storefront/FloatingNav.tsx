@@ -165,11 +165,11 @@ export default function FloatingNav({ cart, onCartUpdate }: FloatingNavProps) {
               />
               
               <motion.div
-                initial={{ y: -20, opacity: 0 }}
+                initial={{ y: -64, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                exit={{ y: -20, opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                className="fixed top-0 left-0 right-0 z-[1000] bg-obsidian-DEFAULT border-b border-white/10 shadow-2xl"
+                exit={{ y: -64, opacity: 0 }}
+                transition={{ duration: 0.3, ease: 'easeOut' }}
+                className="fixed top-16 left-0 right-0 z-[60] bg-obsidian-DEFAULT border-b border-white/10 shadow-2xl"
               >
                 <div className="max-w-7xl mx-auto px-6 h-20 flex items-center gap-4">
                   <Search size={20} className="text-crimson-500" />
