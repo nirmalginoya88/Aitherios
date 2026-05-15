@@ -160,7 +160,8 @@ export default function FloatingNav({ cart, onCartUpdate }: FloatingNavProps) {
             <>
               {/* Maximum Blur Overlay */}
               <div 
-                className="fixed inset-0 z-[999] bg-black/60 backdrop-blur-2xl"
+                className="fixed inset-0 z-[999] bg-black/60"
+                style={{ backdropFilter: 'blur(32px)', WebkitBackdropFilter: 'blur(32px)' }}
                 onClick={() => setSearchOpen(false)}
               />
               
