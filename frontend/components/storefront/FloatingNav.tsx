@@ -158,13 +158,16 @@ export default function FloatingNav({ cart, onCartUpdate }: FloatingNavProps) {
         <AnimatePresence>
           {searchOpen && (
             <>
-              {/* High-Performance Motion Blur Overlay */}
               <motion.div 
-                initial={{ opacity: 0, backdropFilter: 'blur(0px)' }}
-                animate={{ opacity: 1, backdropFilter: 'blur(80px)' }}
-                exit={{ opacity: 0, backdropFilter: 'blur(0px)' }}
-                className="fixed inset-0 z-[999] bg-black/70"
-                style={{ WebkitBackdropFilter: 'blur(80px)' }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-[1000] bg-black/60"
+                style={{ 
+                  backdropFilter: 'blur(40px)', 
+                  WebkitBackdropFilter: 'blur(40px)',
+                  transform: 'translateZ(0)' 
+                }}
                 onClick={() => setSearchOpen(false)}
               />
               
@@ -173,7 +176,8 @@ export default function FloatingNav({ cart, onCartUpdate }: FloatingNavProps) {
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: -64, opacity: 0 }}
                 transition={{ duration: 0.3, ease: 'easeOut' }}
-                className="fixed top-16 left-0 right-0 z-[60] bg-obsidian-900/90 backdrop-blur-xl border-b-2 border-crimson-500 shadow-[0_10px_40px_rgba(255,0,0,0.15)]"
+                className="fixed top-16 left-0 right-0 z-[1001] bg-obsidian-900 border-b-2 border-crimson-500 shadow-2xl"
+                style={{ transform: 'translateZ(0)' }}
               >
                 <div className="max-w-7xl mx-auto px-6 h-20 flex items-center gap-4">
                   <Search size={20} className="text-crimson-500" />
