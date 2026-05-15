@@ -120,7 +120,11 @@ export default function Dashboard({ cart, onCartUpdate, addToCart }: DashboardPr
               </div>
               <div>
                 <h1 className="font-display font-bold text-3xl text-white">
-                  {user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Welcome' : 'Welcome'}
+                  {user ? (
+                    user.firstName === user.lastName 
+                      ? user.firstName 
+                      : `${user.firstName || ''} ${user.lastName || ''}`.trim()
+                  ) || 'Welcome' : 'Welcome'}
                 </h1>
                 <p className="text-steel-300 text-sm">
                   {user ? user.email : 'Please login'} · {user?.role === 'admin' ? 'Admin' : 'Member'}

@@ -157,36 +157,49 @@ export default function FloatingNav({ cart, onCartUpdate }: FloatingNavProps) {
         {/* Search bar */}
         <AnimatePresence>
           {searchOpen && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.3, ease: 'easeInOut' }}
-              className="border-t border-white/5 bg-obsidian-DEFAULT/50 backdrop-blur-md overflow-hidden"
-            >
-              <div className="max-w-7xl mx-auto px-6 py-4 flex items-center gap-4">
-                <Search size={18} className="text-steel-400" />
-                <input
-                  type="search"
-                  placeholder="Search Aitherios catalog..."
-                  autoFocus
-                  className="flex-1 bg-transparent text-white placeholder:text-steel-500 text-lg font-display tracking-wide focus:outline-none"
-                  aria-label="Search input"
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      router.push(`/products?q=${(e.target as HTMLInputElement).value}`);
-                      setSearchOpen(false);
-                    }
-                  }}
-                />
-                <button 
-                  onClick={() => setSearchOpen(false)}
-                  className="text-xs font-display font-bold tracking-widest uppercase text-steel-400 hover:text-white transition-colors"
-                >
-                  ESC
-                </button>
-              </div>
-            </motion.div>
+            <>
+              {/* Click outside overlay */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setSearchOpen(false)}
+                className="fixed inset-0 z-[-1] bg-black/20 backdrop-blur-[2px]"
+              />
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.3, ease: 'easeInOut' }}
+                className="border-t border-white/5 bg-obsidian-DEFAULT/80 backdrop-blur-xl overflow-hidden shadow-2xl"
+              >
+                <div className="max-w-7xl mx-auto px-6 py-4 flex items-center gap-4">
+                  <Search size={18} className="text-steel-400" />
+                  <input
+                    type="search"
+                    placeholder="Search Aitherios catalog..."
+                    autoFocus
+                    className="flex-1 bg-transparent text-white placeholder:text-steel-500 text-lg font-display tracking-wide focus:outline-none"
+                    aria-label="Search input"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        router.push(`/products?q=${(e.target as HTMLInputElement).value}`);
+                        setSearchOpen(false);
+                      }
+                      if (e.key === 'Escape') {
+                        setSearchOpen(false);
+                      }
+                    }}
+                  />
+                  <button 
+                    onClick={() => setSearchOpen(false)}
+                    className="text-xs font-display font-bold tracking-widest uppercase text-steel-400 hover:text-white transition-colors"
+                  >
+                    Close
+                  </button>
+                </div>
+              </motion.div>
+            </>
           )}
         </AnimatePresence>
       </motion.header>
