@@ -158,9 +158,9 @@ export default function FloatingNav({ cart, onCartUpdate }: FloatingNavProps) {
         <AnimatePresence>
           {searchOpen && (
             <>
-              {/* High-priority Click Outside Layer */}
+              {/* High-priority Blur Overlay */}
               <div 
-                className="fixed inset-0 z-[999] bg-black/40"
+                className="fixed inset-0 z-[999] bg-black/40 backdrop-blur-md"
                 onClick={() => setSearchOpen(false)}
               />
               
@@ -169,7 +169,7 @@ export default function FloatingNav({ cart, onCartUpdate }: FloatingNavProps) {
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: -64, opacity: 0 }}
                 transition={{ duration: 0.3, ease: 'easeOut' }}
-                className="fixed top-16 left-0 right-0 z-[60] bg-obsidian-900 border-b-2 border-crimson-500 shadow-[0_10px_40px_rgba(255,0,0,0.15)]"
+                className="fixed top-16 left-0 right-0 z-[60] bg-obsidian-900/90 backdrop-blur-xl border-b-2 border-crimson-500 shadow-[0_10px_40px_rgba(255,0,0,0.15)]"
               >
                 <div className="max-w-7xl mx-auto px-6 h-20 flex items-center gap-4">
                   <Search size={20} className="text-crimson-500" />
