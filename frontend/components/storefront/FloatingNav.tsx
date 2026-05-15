@@ -158,45 +158,44 @@ export default function FloatingNav({ cart, onCartUpdate }: FloatingNavProps) {
         <AnimatePresence>
           {searchOpen && (
             <>
-              {/* Total Blackout Overlay */}
-              <motion.div 
+              {/* Click outside overlay */}
+              <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="fixed inset-0 z-[1000] bg-black"
                 onClick={() => setSearchOpen(false)}
+                className="fixed inset-0 z-[100] bg-black/40 backdrop-blur-[4px]"
               />
-              
               <motion.div
-                initial={{ y: -64, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                exit={{ y: -64, opacity: 0 }}
-                transition={{ duration: 0.3, ease: 'easeOut' }}
-                className="fixed top-16 left-0 right-0 z-[1001] bg-white/5 backdrop-blur-2xl border-b border-white/10 shadow-2xl"
-                style={{ transform: 'translateZ(0)' }}
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.3, ease: 'easeInOut' }}
+                className="fixed top-16 left-0 right-0 z-[101] border-b border-white/5 bg-obsidian-DEFAULT backdrop-blur-2xl overflow-hidden shadow-2xl"
               >
-                <div className="max-w-7xl mx-auto px-6 h-20 flex items-center gap-4">
-                  <Search size={20} className="text-crimson-500" />
+                <div className="max-w-7xl mx-auto px-6 py-4 flex items-center gap-4">
+                  <Search size={18} className="text-steel-400" />
                   <input
                     type="search"
                     placeholder="Search Aitherios catalog..."
                     autoFocus
-                    className="flex-1 bg-transparent text-white placeholder:text-steel-500 text-xl font-display focus:outline-none"
+                    className="flex-1 bg-transparent text-white placeholder:text-steel-500 text-lg font-display tracking-wide focus:outline-none"
                     aria-label="Search input"
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {
                         router.push(`/products?q=${(e.target as HTMLInputElement).value}`);
                         setSearchOpen(false);
                       }
-                      if (e.key === 'Escape') setSearchOpen(false);
+                      if (e.key === 'Escape') {
+                        setSearchOpen(false);
+                      }
                     }}
                   />
                   <button 
                     onClick={() => setSearchOpen(false)}
-                    className="p-2 text-steel-400 hover:text-white transition-colors"
-                    aria-label="Close search"
+                    className="text-xs font-display font-bold tracking-widest uppercase text-steel-400 hover:text-white transition-colors"
                   >
-                    <X size={24} />
+                    Close
                   </button>
                 </div>
               </motion.div>
