@@ -158,9 +158,9 @@ export default function FloatingNav({ cart, onCartUpdate }: FloatingNavProps) {
         <AnimatePresence>
           {searchOpen && (
             <>
-              {/* High-priority Blur Overlay */}
+              {/* Maximum Blur Overlay */}
               <div 
-                className="fixed inset-0 z-[999] bg-black/40 backdrop-blur-md"
+                className="fixed inset-0 z-[999] bg-black/60 backdrop-blur-2xl"
                 onClick={() => setSearchOpen(false)}
               />
               
