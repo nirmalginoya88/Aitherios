@@ -28,10 +28,14 @@ const register = async (userData) => {
         });
 
         // Generate JWT token
-        const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1d' });
+        const token = jwt.sign(
+          { id: user.id, role: user.role },
+          process.env.JWT_SECRET,
+          { expiresIn: '1d' }
+        );
 
         return {
-            user: { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName },
+            user: { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName, role: user.role },
             token
         };
     } catch (error) {
@@ -51,10 +55,14 @@ const login = async (email, password) => {
             throw new Error('Invalid password');
         }
 
-        const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1d' });
+        const token = jwt.sign(
+          { id: user.id, role: user.role },
+          process.env.JWT_SECRET,
+          { expiresIn: '1d' }
+        );
 
         return {
-            user: { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName },
+            user: { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName, role: user.role },
             token
         };
     } catch (error) {

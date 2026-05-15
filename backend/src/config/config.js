@@ -17,7 +17,8 @@ module.exports = {
     dialect: "mysql",
     dialectOptions: {
       ssl: {
-        rejectUnauthorized: true, // Aiven usually requires SSL
+        require: true,
+        rejectUnauthorized: false, // Allows self-signed certificates from Aiven
       }
     }
   }

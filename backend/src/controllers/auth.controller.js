@@ -19,4 +19,9 @@ const login = async (req, res) => {
     }
 };
 
-module.exports = { register, login };
+// Returns the currently authenticated user (requires protect middleware)
+const getMe = async (req, res) => {
+    res.status(200).json({ user: req.user });
+};
+
+module.exports = { register, login, getMe };
