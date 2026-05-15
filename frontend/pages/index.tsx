@@ -216,7 +216,7 @@ export default function Home({ cart, onCartUpdate, addToCart }: HomeProps) {
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <div className="w-48 h-48 bg-crimson-500/15 rounded-full blur-[60px]" />
               </div>
-            </div>
+            </motion.div>
           </div>
 
           {/* Scroll cue */}
