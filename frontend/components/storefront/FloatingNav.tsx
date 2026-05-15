@@ -162,10 +162,10 @@ export default function FloatingNav({ cart, onCartUpdate }: FloatingNavProps) {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="fixed inset-0 z-[1000] bg-black/60"
+                className="fixed inset-0 z-[1000] bg-black/90"
                 style={{ 
-                  backdropFilter: 'blur(40px)', 
-                  WebkitBackdropFilter: 'blur(40px)',
+                  backdropFilter: 'blur(60px) saturate(180%)', 
+                  WebkitBackdropFilter: 'blur(60px) saturate(180%)',
                   transform: 'translateZ(0)' 
                 }}
                 onClick={() => setSearchOpen(false)}
