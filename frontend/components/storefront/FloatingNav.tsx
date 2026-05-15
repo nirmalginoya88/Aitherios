@@ -171,7 +171,7 @@ export default function FloatingNav({ cart, onCartUpdate }: FloatingNavProps) {
                 animate={{ height: 'auto', opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
                 transition={{ duration: 0.3, ease: 'easeInOut' }}
-                className="fixed top-0 left-0 right-0 z-[101] border-b border-white/5 bg-obsidian-DEFAULT/95 backdrop-blur-2xl overflow-hidden shadow-2xl"
+                className="fixed top-16 left-0 right-0 z-[101] border-b border-white/5 bg-obsidian-DEFAULT backdrop-blur-2xl overflow-hidden shadow-2xl"
               >
                 <div className="max-w-7xl mx-auto px-6 py-4 flex items-center gap-4">
                   <Search size={18} className="text-steel-400" />
