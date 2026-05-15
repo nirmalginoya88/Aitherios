@@ -82,7 +82,7 @@ export default function Home({ cart, onCartUpdate, addToCart }: HomeProps) {
           <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-crimson-500/8 rounded-full blur-[120px] pointer-events-none" />
           <div className="absolute top-1/2 left-1/4 w-[300px] h-[300px] bg-crimson-500/5 rounded-full blur-[80px] pointer-events-none" />
 
-          <div className="max-w-7xl mx-auto px-6 pt-28 pb-20 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center w-full">
+          <div className="max-w-7xl mx-auto px-6 pt-24 lg:pt-16 pb-20 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center w-full">
             {/* Text */}
             <motion.div
               style={{ y: heroY, opacity: heroOpacity }}
@@ -99,7 +99,7 @@ export default function Home({ cart, onCartUpdate, addToCart }: HomeProps) {
 
               <motion.h1
                 variants={fadeUp}
-                className="font-display font-bold text-5xl sm:text-6xl lg:text-7xl leading-[0.95] tracking-tight mb-6"
+                className="font-display font-bold text-4xl sm:text-6xl lg:text-7xl leading-[0.95] tracking-tight mb-6"
               >
                 <span className="text-white">Defy</span>
                 <br />

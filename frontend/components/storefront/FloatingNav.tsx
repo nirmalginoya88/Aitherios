@@ -158,25 +158,34 @@ export default function FloatingNav({ cart, onCartUpdate }: FloatingNavProps) {
         <AnimatePresence>
           {searchOpen && (
             <motion.div
-              variants={fadeIn}
-              initial="hidden"
-              animate="visible"
-              exit="hidden"
-              className="border-t border-white/5 px-6 py-3"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
+              className="border-t border-white/5 bg-obsidian-DEFAULT/50 backdrop-blur-md overflow-hidden"
             >
-              <input
-                type="search"
-                placeholder="Search products..."
-                autoFocus
-                className="w-full bg-transparent text-white placeholder:text-steel-400 text-sm focus:outline-none"
-                aria-label="Search input"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    router.push(`/products?q=${(e.target as HTMLInputElement).value}`);
-                    setSearchOpen(false);
-                  }
-                }}
-              />
+              <div className="max-w-7xl mx-auto px-6 py-4 flex items-center gap-4">
+                <Search size={18} className="text-steel-400" />
+                <input
+                  type="search"
+                  placeholder="Search Aitherios catalog..."
+                  autoFocus
+                  className="flex-1 bg-transparent text-white placeholder:text-steel-500 text-lg font-display tracking-wide focus:outline-none"
+                  aria-label="Search input"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      router.push(`/products?q=${(e.target as HTMLInputElement).value}`);
+                      setSearchOpen(false);
+                    }
+                  }}
+                />
+                <button 
+                  onClick={() => setSearchOpen(false)}
+                  className="text-xs font-display font-bold tracking-widest uppercase text-steel-400 hover:text-white transition-colors"
+                >
+                  ESC
+                </button>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
