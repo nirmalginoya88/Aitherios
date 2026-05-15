@@ -31,9 +31,15 @@ const USP_ITEMS = [
 
 export default function Home({ cart, onCartUpdate, addToCart }: HomeProps) {
   const heroRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({ target: heroRef });
-  const heroY = useTransform(scrollYProgress, [0, 1], ['0%', '40%']);
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 1]); // Stay visible
+  const { scrollYProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"]
+  });
+
+  const heroY = useTransform(scrollYProgress, [0, 1], ['0%', '25%']);
+  const heroScale = useTransform(scrollYProgress, [0, 1], [1, 0.95]);
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
+  const heroBlur = useTransform(scrollYProgress, [0, 0.8], ['blur(0px)', 'blur(10px)']);
 
   const [featured, setFeatured] = useState<Product[]>([]);
   const [gridProducts, setGridProducts] = useState<Product[]>([]);
@@ -75,9 +81,15 @@ export default function Home({ cart, onCartUpdate, addToCart }: HomeProps) {
         {/* ── Hero ──────────────────────────────────────────── */}
         <section
           ref={heroRef}
-          className="relative min-h-screen flex items-center overflow-hidden grid-bg"
+          className="relative min-h-screen flex items-center overflow-hidden"
           aria-label="Hero section"
         >
+          {/* Background grid with parallax */}
+          <motion.div 
+            style={{ y: useTransform(scrollYProgress, [0, 1], ['0%', '10%']) }}
+            className="absolute inset-0 grid-bg pointer-events-none" 
+          />
+          
           {/* Background glow */}
           <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-crimson-500/8 rounded-full blur-[120px] pointer-events-none" />
           <div className="absolute top-1/2 left-1/4 w-[300px] h-[300px] bg-crimson-500/5 rounded-full blur-[80px] pointer-events-none" />
@@ -85,7 +97,7 @@ export default function Home({ cart, onCartUpdate, addToCart }: HomeProps) {
           <div className="max-w-7xl mx-auto px-6 pt-24 lg:pt-16 pb-20 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center w-full">
             {/* Text */}
             <motion.div
-              style={{ y: heroY, opacity: heroOpacity }}
+              style={{ y: heroY, opacity: heroOpacity, scale: heroScale, filter: heroBlur }}
               variants={staggerContainer}
               initial="hidden"
               animate="visible"
@@ -154,7 +166,7 @@ export default function Home({ cart, onCartUpdate, addToCart }: HomeProps) {
 
             {/* Floating Product Cards */}
             <motion.div 
-              style={{ y: heroY, opacity: heroOpacity }}
+              style={{ y: heroY, opacity: heroOpacity, scale: heroScale, filter: heroBlur }}
               className="relative h-[400px] sm:h-[450px] lg:h-[500px]"
             >
               {HERO_FLOATING_PRODUCTS.map((product, i) => {
