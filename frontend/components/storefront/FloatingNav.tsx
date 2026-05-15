@@ -158,10 +158,13 @@ export default function FloatingNav({ cart, onCartUpdate }: FloatingNavProps) {
         <AnimatePresence>
           {searchOpen && (
             <>
-              {/* Maximum Blur Overlay */}
-              <div 
-                className="fixed inset-0 z-[999] bg-black/60"
-                style={{ backdropFilter: 'blur(32px)', WebkitBackdropFilter: 'blur(32px)' }}
+              {/* High-Performance Motion Blur Overlay */}
+              <motion.div 
+                initial={{ opacity: 0, backdropFilter: 'blur(0px)' }}
+                animate={{ opacity: 1, backdropFilter: 'blur(40px)' }}
+                exit={{ opacity: 0, backdropFilter: 'blur(0px)' }}
+                className="fixed inset-0 z-[999] bg-black/70"
+                style={{ WebkitBackdropFilter: 'blur(40px)' }}
                 onClick={() => setSearchOpen(false)}
               />
               
