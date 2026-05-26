@@ -7,7 +7,7 @@ const adminController = require('../controllers/admin.controller');
 router.use(protect, adminOnly);
 
 router.get('/analytics', adminController.getAnalytics);
-router.get('/users', adminController.getAllUsers);
+router.get('/customers', adminController.getAllUsers);
 router.patch('/users/:id/role', adminController.updateUserRole);
 
 module.exports = router;

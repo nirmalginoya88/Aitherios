@@ -10,7 +10,13 @@ const startServer = async () => {
     console.log('Database connected successfully.');
     
     // Sync models if needed (be careful with force: true in production!)
-    // await sequelize.sync(); 
+    try {
+      await sequelize.sync({ alter: true })
+        .then(() => console.log("Database synced with new columns!"))
+        .catch(err => console.log("Sync error:", err));
+    } catch (syncError) {
+      console.error('Database sync failed, but starting server anyway:', syncError);
+    }
 
     app.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);

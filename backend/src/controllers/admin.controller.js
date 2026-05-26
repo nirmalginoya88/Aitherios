@@ -4,7 +4,7 @@ const { User } = require('../models');
 const getAnalytics = async (req, res) => {
     try {
         const totalUsers = await User.count();
-        
+
         // Provide the full structure the frontend expects
         res.json({
             kpis: {
@@ -55,7 +55,8 @@ const getAnalytics = async (req, res) => {
 const getAllUsers = async (req, res) => {
     try {
         const users = await User.findAll({
-            attributes: { exclude: ['password'] }
+            attributes: { exclude: ['password'] },
+            where: { role: 'user' }
         });
         res.json(users);
     } catch (error) {
