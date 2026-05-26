@@ -7,5 +7,6 @@ router.post('/register', authController.register);
 router.post('/login', apiLimiter, authController.login);
 router.get('/me', protect, authController.getMe);
 router.post('/logout', protect, authController.logout);
+router.put('/profile', protect, authController.updateProfile);
 
 module.exports = router;

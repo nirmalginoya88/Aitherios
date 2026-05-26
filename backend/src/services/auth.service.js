@@ -9,7 +9,16 @@ const buildToken = (user) => jwt.sign(
 );
 
 const safeUser = (user) => ({
-  id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName, role: user.role
+  id: user.id,
+  email: user.email,
+  firstName: user.firstName,
+  lastName: user.lastName,
+  role: user.role,
+  phone: user.phone,
+  address: user.address,
+  city: user.city,
+  postalCode: user.postalCode,
+  country: user.country
 });
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -58,4 +67,43 @@ const login = async (email, password) => {
   }
 };
 
-module.exports = { register, login ,emailRegex};
+const updateProfile = async (userId, updateData) => {
+  try {
+    const { firstName, lastName, email, phone, address, city, postalCode, country } = updateData;
+
+    if (!email) {
+      throw new Error('Email is required');
+    }
+
+    if (!emailRegex.test(email)) {
+      throw new Error('Invalid email format');
+    }
+
+    const user = await User.findByPk(userId);
+    if (!user) throw new Error('User not found');
+
+    // If changing email, check if it's already in use
+    if (email !== user.email) {
+      const existingUser = await User.findOne({ where: { email } });
+      if (existingUser) throw new Error('Email is already in use');
+    }
+
+    await user.update({
+      firstName,
+      lastName,
+      email,
+      phone,
+      address,
+      city,
+      postalCode,
+      country
+    });
+
+    const token = buildToken(user);
+    return { user: safeUser(user), token };
+  } catch (error) {
+    throw error;
+  }
+};
+
+module.exports = { register, login, emailRegex, updateProfile };

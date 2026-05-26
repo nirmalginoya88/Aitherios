@@ -24,4 +24,25 @@ const getMe = async (req, res) => {
     res.status(200).json({ user: req.user });
 };
 
-module.exports = { register, login, getMe };
+// Logs out the user by removing the token (requires protect middleware)
+const logout = async (req, res) => {
+    try {
+        // Since the token is sent via the Authorization header, there's nothing to remove server-side.
+        // Logout is handled client-side by clearing the token.
+        res.status(200).json({ message: 'Logout successful' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }   
+};
+
+const updateProfile = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const result = await authService.updateProfile(userId, req.body);
+        res.status(200).json({ message: 'User profile updated successfully', user: result.user, token: result.token });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+}
+
+module.exports = { register, login, getMe, logout, updateProfile };
