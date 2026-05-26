@@ -1,4 +1,13 @@
 require('dotenv').config();
+
+// Prevent silent crashes from unhandled errors
+process.on('uncaughtException', (err) => {
+  console.error('[uncaughtException] Server will continue running:', err.message);
+});
+
+process.on('unhandledRejection', (reason) => {
+  console.error('[unhandledRejection] Server will continue running:', reason);
+});
 const app = require('./src/app');
 const { sequelize } = require('./src/models');
 
