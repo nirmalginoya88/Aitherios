@@ -158,28 +158,30 @@ export default function FloatingNav({ cart, onCartUpdate }: FloatingNavProps) {
         <AnimatePresence>
           {searchOpen && (
             <>
-              {/* Click outside overlay */}
+              {/* Dark backdrop with rich blur to completely separate from background hero text */}
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 onClick={() => setSearchOpen(false)}
-                className="fixed inset-0 z-[100] bg-black/40 backdrop-blur-[4px]"
+                className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md"
               />
+              
+              {/* Spotlight search card */}
               <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.3, ease: 'easeInOut' }}
-                className="fixed top-16 left-0 right-0 z-[101] border-b border-white/5 bg-obsidian-DEFAULT backdrop-blur-2xl overflow-hidden shadow-2xl"
+                initial={{ scale: 0.95, opacity: 0, y: -20, x: '-50%' }}
+                animate={{ scale: 1, opacity: 1, y: 0, x: '-50%' }}
+                exit={{ scale: 0.95, opacity: 0, y: -10, x: '-50%' }}
+                transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                className="fixed top-[15%] left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-2xl z-[101] glass border border-white/10 rounded-2xl shadow-2xl shadow-crimson-950/20 overflow-hidden"
               >
-                <div className="max-w-7xl mx-auto px-6 py-4 flex items-center gap-4">
-                  <Search size={18} className="text-steel-400" />
+                <div className="flex items-center gap-4 px-5 py-4 border-b border-white/5">
+                  <Search size={20} className="text-crimson-500 animate-pulse" />
                   <input
                     type="search"
-                    placeholder="Search Aitherios catalog..."
+                    placeholder="Search Aitherios catalog (e.g. jackets, hoodies)..."
                     autoFocus
-                    className="flex-1 bg-transparent text-white placeholder:text-steel-500 text-lg font-display tracking-wide focus:outline-none"
+                    className="flex-1 bg-transparent text-white placeholder:text-steel-400 text-base font-display focus:outline-none"
                     aria-label="Search input"
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {
@@ -191,12 +193,68 @@ export default function FloatingNav({ cart, onCartUpdate }: FloatingNavProps) {
                       }
                     }}
                   />
-                  <button 
-                    onClick={() => setSearchOpen(false)}
-                    className="text-xs font-display font-bold tracking-widest uppercase text-steel-400 hover:text-white transition-colors"
-                  >
-                    Close
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <kbd className="hidden sm:inline-flex items-center h-5 select-none pointer-events-none px-1.5 font-mono text-[10px] font-medium bg-white/5 text-steel-400 rounded border border-white/10">
+                      ESC
+                    </kbd>
+                    <button 
+                      onClick={() => setSearchOpen(false)}
+                      className="w-7 h-7 rounded-lg flex items-center justify-center text-steel-400 hover:text-white hover:bg-white/5 transition-colors"
+                      aria-label="Close search"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Quick suggestions panel */}
+                <div className="px-5 py-4 bg-black/20">
+                  <p className="text-[10px] font-display font-semibold uppercase tracking-widest text-steel-400 mb-3">
+                    Popular Categories
+                  </p>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {[
+                      { label: 'Jackets & Outerwear', href: '/products?category=outerwear' },
+                      { label: 'Hoodies', href: '/products?category=hoodies' },
+                      { label: 'Tech Pants', href: '/products?category=pants' },
+                      { label: 'Limited Drops', href: '/products?tag=limited' },
+                    ].map((cat) => (
+                      <button
+                        key={cat.label}
+                        onClick={() => {
+                          router.push(cat.href);
+                          setSearchOpen(false);
+                        }}
+                        className="text-xs px-3 py-1.5 rounded-lg bg-white/5 hover:bg-crimson-500/10 hover:text-crimson-400 border border-white/5 hover:border-crimson-500/20 transition-all font-display font-medium text-steel-200"
+                      >
+                        {cat.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  <p className="text-[10px] font-display font-semibold uppercase tracking-widest text-steel-400 mb-3">
+                    Recent Search Suggestions
+                  </p>
+                  <div className="space-y-1">
+                    {[
+                      'Void Runner Parka',
+                      'Phantom Cargo Pant v2',
+                      'Ashen Techwear Mask',
+                    ].map((term) => (
+                      <button
+                        key={term}
+                        onClick={() => {
+                          router.push(`/products?q=${term}`);
+                          setSearchOpen(false);
+                        }}
+                        className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-left text-sm text-steel-300 hover:text-white hover:bg-white/5 transition-all font-display"
+                      >
+                        <Search size={13} className="text-steel-500" />
+                        <span>{term}</span>
+                        <span className="ml-auto text-[10px] text-steel-500 font-mono">⏎ Search</span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </motion.div>
             </>
