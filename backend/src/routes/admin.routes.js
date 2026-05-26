@@ -8,6 +8,8 @@ router.use(protect, adminOnly);
 
 router.get('/analytics', adminController.getAnalytics);
 router.get('/customers', adminController.getAllUsers);
+router.get('/orders', adminController.getAllOrders);
+router.put('/orders/:id/status', adminController.updateOrderStatus);
 router.patch('/users/:id/role', adminController.updateUserRole);
 
 module.exports = router;
