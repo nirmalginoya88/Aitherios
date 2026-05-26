@@ -49,7 +49,7 @@ const getAllUsers = async (req, res) => {
             let status = 'active';
             if (totalSpent > 500) {
                 status = 'vip';
-            } else if (totalOrders === 0) {
+            } else if (totalOrders === 0 || new Date(lastActive) < (new Date() - 30*24*60*60*1000)) {
                 status = 'inactive';
             }
 
