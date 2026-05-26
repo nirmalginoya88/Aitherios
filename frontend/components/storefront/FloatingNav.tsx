@@ -173,7 +173,7 @@ export default function FloatingNav({ cart, onCartUpdate }: FloatingNavProps) {
                 animate={{ scale: 1, opacity: 1, y: 0, x: '-50%' }}
                 exit={{ scale: 0.95, opacity: 0, y: -10, x: '-50%' }}
                 transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-                className="fixed top-[15%] left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-2xl z-[101] glass border border-white/10 rounded-2xl shadow-2xl shadow-crimson-950/20 overflow-hidden"
+                className="fixed top-[15%] left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-2xl z-[101] bg-obsidian-200/95 border border-white/10 rounded-2xl shadow-2xl shadow-crimson-950/20 backdrop-blur-xl overflow-hidden"
               >
                 <div className="flex items-center gap-4 px-5 py-4 border-b border-white/5">
                   <Search size={20} className="text-crimson-500 animate-pulse" />
@@ -181,7 +181,7 @@ export default function FloatingNav({ cart, onCartUpdate }: FloatingNavProps) {
                     type="search"
                     placeholder="Search Aitherios catalog (e.g. jackets, hoodies)..."
                     autoFocus
-                    className="flex-1 bg-transparent text-white placeholder:text-steel-400 text-base font-display focus:outline-none"
+                    className="flex-1 bg-transparent text-white placeholder:text-zinc-500 text-base font-display focus:outline-none"
                     aria-label="Search input"
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {
@@ -194,12 +194,12 @@ export default function FloatingNav({ cart, onCartUpdate }: FloatingNavProps) {
                     }}
                   />
                   <div className="flex items-center gap-2">
-                    <kbd className="hidden sm:inline-flex items-center h-5 select-none pointer-events-none px-1.5 font-mono text-[10px] font-medium bg-white/5 text-steel-400 rounded border border-white/10">
+                    <kbd className="hidden sm:inline-flex items-center h-5 select-none pointer-events-none px-1.5 font-mono text-[10px] font-medium bg-white/5 text-zinc-400 rounded border border-white/10">
                       ESC
                     </kbd>
                     <button 
                       onClick={() => setSearchOpen(false)}
-                      className="w-7 h-7 rounded-lg flex items-center justify-center text-steel-400 hover:text-white hover:bg-white/5 transition-colors"
+                      className="w-7 h-7 rounded-lg flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/5 transition-colors"
                       aria-label="Close search"
                     >
                       <X size={16} />
@@ -209,7 +209,7 @@ export default function FloatingNav({ cart, onCartUpdate }: FloatingNavProps) {
 
                 {/* Quick suggestions panel */}
                 <div className="px-5 py-4 bg-black/20">
-                  <p className="text-[10px] font-display font-semibold uppercase tracking-widest text-steel-400 mb-3">
+                  <p className="text-[10px] font-display font-semibold uppercase tracking-widest text-zinc-400 mb-3">
                     Popular Categories
                   </p>
                   <div className="flex flex-wrap gap-2 mb-4">
@@ -225,14 +225,14 @@ export default function FloatingNav({ cart, onCartUpdate }: FloatingNavProps) {
                           router.push(cat.href);
                           setSearchOpen(false);
                         }}
-                        className="text-xs px-3 py-1.5 rounded-lg bg-white/5 hover:bg-crimson-500/10 hover:text-crimson-400 border border-white/5 hover:border-crimson-500/20 transition-all font-display font-medium text-steel-200"
+                        className="text-xs px-3 py-1.5 rounded-lg bg-white/5 hover:bg-crimson-500/10 hover:text-crimson-400 border border-white/5 hover:border-crimson-500/20 transition-all font-display font-medium text-zinc-200"
                       >
                         {cat.label}
                       </button>
                     ))}
                   </div>
 
-                  <p className="text-[10px] font-display font-semibold uppercase tracking-widest text-steel-400 mb-3">
+                  <p className="text-[10px] font-display font-semibold uppercase tracking-widest text-zinc-400 mb-3">
                     Recent Search Suggestions
                   </p>
                   <div className="space-y-1">
@@ -247,11 +247,11 @@ export default function FloatingNav({ cart, onCartUpdate }: FloatingNavProps) {
                           router.push(`/products?q=${term}`);
                           setSearchOpen(false);
                         }}
-                        className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-left text-sm text-steel-300 hover:text-white hover:bg-white/5 transition-all font-display"
+                        className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-left text-sm text-zinc-200 hover:text-white hover:bg-white/5 transition-all font-display"
                       >
-                        <Search size={13} className="text-steel-500" />
+                        <Search size={13} className="text-zinc-500" />
                         <span>{term}</span>
-                        <span className="ml-auto text-[10px] text-steel-500 font-mono">⏎ Search</span>
+                        <span className="ml-auto text-[10px] text-zinc-500 font-mono">⏎ Search</span>
                       </button>
                     ))}
                   </div>
