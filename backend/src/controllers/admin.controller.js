@@ -47,10 +47,21 @@ const getAllUsers = async (req, res) => {
             }
             
             let status = 'active';
+            const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+            const registrationDate = user.createdAt ? new Date(user.createdAt) : new Date();
+
             if (totalSpent > 500) {
                 status = 'vip';
-            } else if (totalOrders === 0 || new Date(lastActive) < (new Date() - 30*24*60*60*1000)) {
-                status = 'inactive';
+            } else if (totalOrders === 0) {
+                // If they have 0 orders and registered more than 30 days ago, they are inactive
+                if (registrationDate < thirtyDaysAgo) {
+                    status = 'inactive';
+                }
+            } else {
+                // If they have orders, check if the last active order date was more than 30 days ago
+                if (new Date(lastActive) < thirtyDaysAgo) {
+                    status = 'inactive';
+                }
             }
 
             return {
