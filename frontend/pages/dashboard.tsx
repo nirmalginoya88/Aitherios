@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Package, Heart, User, ChevronRight, CheckCircle,
-  Clock, Truck, MapPin, Edit3, Bell,
+  Clock, Truck, MapPin, Edit3, Bell, LogOut,
 } from 'lucide-react';
 import FloatingNav from '@/components/storefront/FloatingNav';
 import Footer from '@/components/storefront/Footer';
@@ -46,12 +46,28 @@ interface DashboardProps {
 
 export default function Dashboard({ cart, onCartUpdate, addToCart }: DashboardProps) {
   const router = useRouter();
-  const { user, isLoading: authLoading } = useAuth();
+  const { user, isLoading: authLoading, logout, login } = useAuth();
   const [tab, setTab] = useState<DashboardTab>('orders');
   
   const [userOrders, setUserOrders] = useState<any[]>([]);
   const [wishlist, setWishlist] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Dynamic profile fields
+  const [profile, setProfile] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    address: '',
+    city: '',
+    postalCode: '',
+    country: ''
+  });
+  const [isEditing, setIsEditing] = useState<'profile' | 'address' | null>(null);
+  const [saveLoading, setSaveLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -63,12 +79,35 @@ export default function Dashboard({ cart, onCartUpdate, addToCart }: DashboardPr
     if (user) {
       const fetchData = async () => {
         try {
-          const [ordersRes, wishlistRes] = await Promise.all([
+          const [ordersRes, wishlistRes, userRes] = await Promise.all([
             api.get('/orders/me'),
-            api.get('/user/wishlist')
+            api.get('/user/wishlist'),
+            api.get('/auth/me').catch(() => null)
           ]);
           setUserOrders(ordersRes.data || []);
           setWishlist(wishlistRes.data || []);
+          
+          if (userRes && userRes.data && userRes.data.user) {
+            const u = userRes.data.user;
+            setProfile({
+              firstName: u.firstName || '',
+              lastName: u.lastName || '',
+              email: u.email || '',
+              phone: u.phone || '',
+              address: u.address || '',
+              city: u.city || '',
+              postalCode: u.postalCode || '',
+              country: u.country || ''
+            });
+          } else {
+            // Fallback to JWT payload
+            setProfile(p => ({
+              ...p,
+              firstName: user.firstName || '',
+              lastName: user.lastName || '',
+              email: user.email || ''
+            }));
+          }
         } catch (err) {
           console.error('Failed to fetch dashboard data', err);
         } finally {
@@ -78,6 +117,26 @@ export default function Dashboard({ cart, onCartUpdate, addToCart }: DashboardPr
       fetchData();
     }
   }, [user]);
+
+  const handleSaveProfile = async (e: React.FormEvent, type: 'profile' | 'address') => {
+    e.preventDefault();
+    setSaveLoading(true);
+    setError(null);
+    setSuccess(null);
+    try {
+      const res = await api.put('/auth/profile', profile);
+      setSuccess(`${type === 'profile' ? 'Personal Info' : 'Shipping Address'} updated successfully!`);
+      setIsEditing(null);
+      if (res && res.data && res.data.token) {
+        login(res.data.token);
+      }
+    } catch (err: any) {
+      console.error('Failed to save profile', err);
+      setError(err.response?.data?.error || err.message || 'Failed to update profile.');
+    } finally {
+      setSaveLoading(false);
+    }
+  };
 
   const getStepIndex = (status: string) => {
     if (status === 'pending') return 0;
@@ -175,13 +234,21 @@ export default function Dashboard({ cart, onCartUpdate, addToCart }: DashboardPr
                     </li>
                   ))}
                 </ul>
-                <div className="mt-6 pt-6 border-t border-white/8">
-                  <Link
-                    href="/admin"
-                    className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-display font-semibold text-steel-400 hover:text-white hover:bg-white/5 transition-all"
+                <div className="mt-6 pt-6 border-t border-white/8 space-y-1">
+                  {user?.role === 'admin' && (
+                    <Link
+                      href="/admin"
+                      className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-display font-semibold text-steel-400 hover:text-white hover:bg-white/5 transition-all"
+                    >
+                      Admin Panel →
+                    </Link>
+                  )}
+                  <button
+                    onClick={logout}
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-display font-semibold text-crimson-500 hover:text-crimson-400 hover:bg-crimson-500/5 transition-all"
                   >
-                    Admin Panel →
-                  </Link>
+                    <LogOut size={17} /> Logout
+                  </button>
                 </div>
               </nav>
             </aside>
@@ -365,30 +432,208 @@ export default function Dashboard({ cart, onCartUpdate, addToCart }: DashboardPr
                     className="space-y-4"
                     role="tabpanel"
                   >
-                    <motion.h2 variants={fadeUp} className="font-display font-bold text-xl text-white">
+                    <motion.h2 variants={fadeUp} className="font-display font-bold text-xl text-white mb-2">
                       Account Settings
                     </motion.h2>
-                    {[
-                      { label: 'Personal Info', fields: ['Full Name: Zara Noctis', 'Email: zara@example.com', 'Phone: +81-90-0000-0001'] },
-                      { label: 'Shipping Address', fields: ['12 Neon Ave', 'Neo Tokyo, JP 100-001', 'Japan'] },
-                      { label: 'Preferences', fields: ['Newsletter: Enabled', 'Dark Mode: On', 'Language: English'] },
-                    ].map(({ label, fields }) => (
-                      <motion.div key={label} variants={fadeUp} className="glass rounded-2xl p-5">
-                        <div className="flex items-center justify-between mb-4">
-                          <h3 className="font-display font-bold text-sm text-white uppercase tracking-widest">
-                            {label}
-                          </h3>
-                          <button className="flex items-center gap-1 text-xs text-steel-300 hover:text-crimson-400 transition-colors">
+
+                    {/* Messages */}
+                    {error && (
+                      <motion.div variants={fadeUp} className="p-4 bg-crimson-500/10 border border-crimson-500/20 text-crimson-400 rounded-xl text-sm">
+                        {error}
+                      </motion.div>
+                    )}
+                    {success && (
+                      <motion.div variants={fadeUp} className="p-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-xl text-sm">
+                        {success}
+                      </motion.div>
+                    )}
+
+                    {/* 1. Personal Info */}
+                    <motion.div variants={fadeUp} className="glass rounded-2xl p-5">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="font-display font-bold text-sm text-white uppercase tracking-widest">
+                          Personal Info
+                        </h3>
+                        {isEditing !== 'profile' && (
+                          <button
+                            onClick={() => { setIsEditing('profile'); setError(null); setSuccess(null); }}
+                            className="flex items-center gap-1 text-xs text-steel-300 hover:text-crimson-400 transition-colors"
+                          >
                             <Edit3 size={12} /> Edit
                           </button>
-                        </div>
+                        )}
+                      </div>
+
+                      {isEditing === 'profile' ? (
+                        <form onSubmit={(e) => handleSaveProfile(e, 'profile')} className="space-y-4">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-[10px] uppercase tracking-wider text-steel-400 mb-1.5 font-display font-semibold">First Name</label>
+                              <input
+                                type="text"
+                                value={profile.firstName}
+                                onChange={(e) => setProfile({ ...profile, firstName: e.target.value })}
+                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm placeholder-steel-500 focus:outline-none focus:border-crimson-500 transition-all"
+                                required
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[10px] uppercase tracking-wider text-steel-400 mb-1.5 font-display font-semibold">Last Name</label>
+                              <input
+                                type="text"
+                                value={profile.lastName}
+                                onChange={(e) => setProfile({ ...profile, lastName: e.target.value })}
+                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm placeholder-steel-500 focus:outline-none focus:border-crimson-500 transition-all"
+                                required
+                              />
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-[10px] uppercase tracking-wider text-steel-400 mb-1.5 font-display font-semibold">Email Address</label>
+                              <input
+                                type="email"
+                                value={profile.email}
+                                onChange={(e) => setProfile({ ...profile, email: e.target.value })}
+                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm placeholder-steel-500 focus:outline-none focus:border-crimson-500 transition-all"
+                                required
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[10px] uppercase tracking-wider text-steel-400 mb-1.5 font-display font-semibold">Phone Number</label>
+                              <input
+                                type="text"
+                                value={profile.phone}
+                                onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
+                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm placeholder-steel-500 focus:outline-none focus:border-crimson-500 transition-all"
+                              />
+                            </div>
+                          </div>
+                          <div className="flex gap-3 justify-end pt-2">
+                            <button
+                              type="button"
+                              onClick={() => setIsEditing(null)}
+                              className="px-4 py-2 text-xs font-display font-bold text-steel-400 hover:text-white transition-colors"
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              type="submit"
+                              disabled={saveLoading}
+                              className="px-5 py-2 bg-crimson-500 text-white rounded-xl font-display font-bold text-xs hover:bg-crimson-600 hover:shadow-glow transition-all disabled:opacity-50"
+                            >
+                              {saveLoading ? 'Saving...' : 'Save Changes'}
+                            </button>
+                          </div>
+                        </form>
+                      ) : (
                         <div className="space-y-1.5">
-                          {fields.map((f) => (
-                            <p key={f} className="text-sm text-steel-200">{f}</p>
-                          ))}
+                          <p className="text-sm text-steel-200"><span className="text-steel-400 mr-2">Full Name:</span> {profile.firstName} {profile.lastName}</p>
+                          <p className="text-sm text-steel-200"><span className="text-steel-400 mr-2">Email:</span> {profile.email}</p>
+                          <p className="text-sm text-steel-200"><span className="text-steel-400 mr-2">Phone:</span> {profile.phone || 'Not set'}</p>
                         </div>
-                      </motion.div>
-                    ))}
+                      )}
+                    </motion.div>
+
+                    {/* 2. Shipping Address */}
+                    <motion.div variants={fadeUp} className="glass rounded-2xl p-5">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="font-display font-bold text-sm text-white uppercase tracking-widest">
+                          Shipping Address
+                        </h3>
+                        {isEditing !== 'address' && (
+                          <button
+                            onClick={() => { setIsEditing('address'); setError(null); setSuccess(null); }}
+                            className="flex items-center gap-1 text-xs text-steel-300 hover:text-crimson-400 transition-colors"
+                          >
+                            <Edit3 size={12} /> Edit
+                          </button>
+                        )}
+                      </div>
+
+                      {isEditing === 'address' ? (
+                        <form onSubmit={(e) => handleSaveProfile(e, 'address')} className="space-y-4">
+                          <div>
+                            <label className="block text-[10px] uppercase tracking-wider text-steel-400 mb-1.5 font-display font-semibold">Street Address</label>
+                            <input
+                              type="text"
+                              value={profile.address}
+                              onChange={(e) => setProfile({ ...profile, address: e.target.value })}
+                              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm placeholder-steel-500 focus:outline-none focus:border-crimson-500 transition-all"
+                              required
+                            />
+                          </div>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-[10px] uppercase tracking-wider text-steel-400 mb-1.5 font-display font-semibold">City / State</label>
+                              <input
+                                type="text"
+                                value={profile.city}
+                                onChange={(e) => setProfile({ ...profile, city: e.target.value })}
+                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm placeholder-steel-500 focus:outline-none focus:border-crimson-500 transition-all"
+                                required
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[10px] uppercase tracking-wider text-steel-400 mb-1.5 font-display font-semibold">Postal Code</label>
+                              <input
+                                type="text"
+                                value={profile.postalCode}
+                                onChange={(e) => setProfile({ ...profile, postalCode: e.target.value })}
+                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm placeholder-steel-500 focus:outline-none focus:border-crimson-500 transition-all"
+                                required
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <label className="block text-[10px] uppercase tracking-wider text-steel-400 mb-1.5 font-display font-semibold">Country</label>
+                            <input
+                              type="text"
+                              value={profile.country}
+                              onChange={(e) => setProfile({ ...profile, country: e.target.value })}
+                              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm placeholder-steel-500 focus:outline-none focus:border-crimson-500 transition-all"
+                              required
+                            />
+                          </div>
+                          <div className="flex gap-3 justify-end pt-2">
+                            <button
+                              type="button"
+                              onClick={() => setIsEditing(null)}
+                              className="px-4 py-2 text-xs font-display font-bold text-steel-400 hover:text-white transition-colors"
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              type="submit"
+                              disabled={saveLoading}
+                              className="px-5 py-2 bg-crimson-500 text-white rounded-xl font-display font-bold text-xs hover:bg-crimson-600 hover:shadow-glow transition-all disabled:opacity-50"
+                            >
+                              {saveLoading ? 'Saving...' : 'Save Changes'}
+                            </button>
+                          </div>
+                        </form>
+                      ) : (
+                        <div className="space-y-1.5">
+                          <p className="text-sm text-steel-200"><span className="text-steel-400 mr-2">Address:</span> {profile.address || 'Not set'}</p>
+                          <p className="text-sm text-steel-200"><span className="text-steel-400 mr-2">City & Zip:</span> {profile.city ? `${profile.city}, ${profile.postalCode || ''}` : 'Not set'}</p>
+                          <p className="text-sm text-steel-200"><span className="text-steel-400 mr-2">Country:</span> {profile.country || 'Not set'}</p>
+                        </div>
+                      )}
+                    </motion.div>
+
+                    {/* 3. Preferences */}
+                    <motion.div variants={fadeUp} className="glass rounded-2xl p-5">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="font-display font-bold text-sm text-white uppercase tracking-widest">
+                          Preferences
+                        </h3>
+                      </div>
+                      <div className="space-y-1.5">
+                        <p className="text-sm text-steel-200"><span className="text-steel-400 mr-2">Newsletter:</span> Enabled</p>
+                        <p className="text-sm text-steel-200"><span className="text-steel-400 mr-2">Dark Mode:</span> On</p>
+                        <p className="text-sm text-steel-200"><span className="text-steel-400 mr-2">Language:</span> English</p>
+                      </div>
+                    </motion.div>
                   </motion.div>
                 )}
 

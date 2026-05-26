@@ -6,5 +6,6 @@ const { protect, apiLimiter } = require('../middleware/auth.middleware');
 router.post('/register', authController.register);
 router.post('/login', apiLimiter, authController.login);
 router.get('/me', protect, authController.getMe);
+router.post('/logout', protect, authController.logout);
 
 module.exports = router;
