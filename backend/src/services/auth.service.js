@@ -12,12 +12,22 @@ const safeUser = (user) => ({
   id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName, role: user.role
 });
 
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 const register = async (userData) => {
   try {
     const { firstName, lastName, email, password } = userData;
 
     if (!firstName || !lastName || !email || !password) {
       throw new Error('All fields are required');
+    }
+
+    if (!emailRegex.test(email)) {
+      throw new Error('Invalid email format');
+    }
+
+    if (password.length < 6) {
+      throw new Error('Password must be at least 6 characters long');
     }
 
     const existingUser = await User.findOne({ where: { email } });
@@ -48,4 +58,4 @@ const login = async (email, password) => {
   }
 };
 
-module.exports = { register, login };
+module.exports = { register, login ,emailRegex};
