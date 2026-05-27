@@ -17,6 +17,12 @@ module.exports = (sequelize, DataTypes) => {
                 as: 'variations',
                 onDelete: 'CASCADE'
             });
+
+            // A product belongs to a category
+            Product.belongsTo(models.Category, {
+                foreignKey: 'categoryId',
+                as: 'category'
+            });
         }
     }
 
