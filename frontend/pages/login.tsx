@@ -35,6 +35,9 @@ export default function LoginPage() {
   const [confirmPass, setConfirmPass] = useState('');
   const [passError, setPassError] = useState('');
   const [forgotLoading, setForgotLoading] = useState(false);
+  const [forgotError, setForgotError] = useState('');
+  // Short-lived token returned by verify-otp, used to authorise the reset call
+  const [otpToken, setOtpToken] = useState('');
   const otpRefs = [useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null)];
 
   // Redirect if already logged in
@@ -64,13 +67,33 @@ export default function LoginPage() {
   const handleSendCode = async (e: React.FormEvent) => {
     e.preventDefault();
     setForgotLoading(true);
-    // Mock: simulate network delay then proceed
-    await new Promise(r => setTimeout(r, 1200));
-    setForgotLoading(false);
-    setForgotStep('otp');
-    setOtpValue(['', '', '', '']);
+    setForgotError('');
+    try {
+      await api.post('/auth/forgot-password', { email: forgotEmail });
+      setForgotStep('otp');
+      setOtpValue(['', '', '', '']);
+      setOtpError('');
+      setTimeout(() => otpRefs[0].current?.focus(), 100);
+    } catch (err: any) {
+      setForgotError(err.response?.data?.error || err.response?.data?.message || 'Could not send code. Please try again.');
+    } finally {
+      setForgotLoading(false);
+    }
+  };
+
+  const handleResendCode = async () => {
+    setForgotLoading(true);
     setOtpError('');
-    setTimeout(() => otpRefs[0].current?.focus(), 100);
+    setForgotError('');
+    try {
+      await api.post('/auth/forgot-password', { email: forgotEmail });
+      setOtpValue(['', '', '', '']);
+      setTimeout(() => otpRefs[0].current?.focus(), 100);
+    } catch (err: any) {
+      setOtpError(err.response?.data?.error || 'Could not resend code.');
+    } finally {
+      setForgotLoading(false);
+    }
   };
 
   const handleOtpInput = (idx: number, val: string) => {
@@ -88,17 +111,24 @@ export default function LoginPage() {
     }
   };
 
-  const handleVerifyOtp = (e: React.FormEvent) => {
+  const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     const entered = otpValue.join('');
-    if (entered !== '1234') {
-      setOtpError('Incorrect code. Hint: it\'s 1234 😉');
-      return;
+    setForgotLoading(true);
+    setOtpError('');
+    try {
+      const res = await api.post('/auth/verify-otp', { email: forgotEmail, otp: entered });
+      // Backend returns a short-lived token to authorise the reset step
+      setOtpToken(res.data.resetToken ?? '');
+      setForgotStep('newpass');
+      setNewPass('');
+      setConfirmPass('');
+      setPassError('');
+    } catch (err: any) {
+      setOtpError(err.response?.data?.error || err.response?.data?.message || 'Invalid or expired code.');
+    } finally {
+      setForgotLoading(false);
     }
-    setForgotStep('newpass');
-    setNewPass('');
-    setConfirmPass('');
-    setPassError('');
   };
 
   const handleResetPassword = async (e: React.FormEvent) => {
@@ -106,9 +136,15 @@ export default function LoginPage() {
     if (newPass.length < 6) { setPassError('Password must be at least 6 characters.'); return; }
     if (newPass !== confirmPass) { setPassError('Passwords do not match.'); return; }
     setForgotLoading(true);
-    await new Promise(r => setTimeout(r, 1000));
-    setForgotLoading(false);
-    setForgotStep('done');
+    setPassError('');
+    try {
+      await api.post('/auth/reset-password', { email: forgotEmail, resetToken: otpToken, newPassword: newPass });
+      setForgotStep('done');
+    } catch (err: any) {
+      setPassError(err.response?.data?.error || err.response?.data?.message || 'Reset failed. Please start again.');
+    } finally {
+      setForgotLoading(false);
+    }
   };
 
   const resetForgotFlow = () => {
@@ -117,9 +153,11 @@ export default function LoginPage() {
     setForgotEmail('');
     setOtpValue(['', '', '', '']);
     setOtpError('');
+    setForgotError('');
     setPassError('');
     setNewPass('');
     setConfirmPass('');
+    setOtpToken('');
   };
 
   if (isLoading || user) {
@@ -281,6 +319,11 @@ export default function LoginPage() {
                         required
                         autoFocus
                       />
+                      {forgotError && (
+                        <motion.p initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} className="text-sm text-red-400 text-center">
+                          {forgotError}
+                        </motion.p>
+                      )}
                       <Button type="submit" variant="primary" size="lg" className="w-full" loading={forgotLoading}>
                         Send Verification Code
                       </Button>
@@ -347,6 +390,7 @@ export default function LoginPage() {
                         variant="primary"
                         size="lg"
                         className="w-full"
+                        loading={forgotLoading}
                         disabled={otpValue.some(d => !d)}
                       >
                         Verify Code
@@ -357,7 +401,7 @@ export default function LoginPage() {
                         <button
                           type="button"
                           className="text-crimson-400 hover:text-crimson-300 transition-colors"
-                          onClick={() => { setOtpValue(['', '', '', '']); setOtpError(''); }}
+                          onClick={handleResendCode}
                         >
                           Resend
                         </button>

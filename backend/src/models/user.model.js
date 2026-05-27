@@ -27,7 +27,9 @@ module.exports = (sequelize, DataTypes) => {
     address: DataTypes.TEXT,
     city: DataTypes.STRING,
     postalCode: DataTypes.STRING,
-    country: DataTypes.STRING
+    country: DataTypes.STRING,
+    otp: DataTypes.STRING,
+    otpExpiredAt: DataTypes.DATE
   }, {
     sequelize,
     modelName: 'User',
