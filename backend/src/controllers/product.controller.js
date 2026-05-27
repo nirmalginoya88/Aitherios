@@ -173,8 +173,19 @@ const getProducts = async (req, res) => {
 const getProduct = async (req, res) => {
     try {
         const { name } = req.params;
+        const decodedName = decodeURIComponent(name);
+        const searchSlug = decodedName.toLowerCase().replace(/\s+/g, '-');
+        const searchName = decodedName.replace(/-/g, ' ');
+
         const product = await Product.findOne({
-            where: { name },
+            where: {
+                [db.Sequelize.Op.or]: [
+                    { name: decodedName },
+                    { slug: decodedName },
+                    { name: searchName },
+                    { slug: searchSlug }
+                ]
+            },
             include: [
                 {
                     model: ProductImage,
