@@ -1,5 +1,5 @@
 import Head from 'next/head';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import {
@@ -28,12 +28,32 @@ export default function InventoryPage() {
   const [bulkSelected, setBulkSelected] = useState<string[]>([]);
   const [categories, setCategories] = useState<string[]>(['All']);
 
+  // Form State
+  const [formState, setFormState] = useState({
+    name: '',
+    slug: '',
+    category: '',
+    price: 0,
+    originalPrice: 0,
+    stock: 0,
+    badge: '',
+    description: '',
+    sizes: '',
+    tags: '',
+  });
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   useEffect(() => {
     const fetchInventory = async () => {
       try {
         const res = await api.get('/products');
-        setProducts(res.data || []);
-        const cats = Array.from(new Set((res.data || []).map((p: any) => p.category))) as string[];
+        const productList = res.data?.products || res.data || [];
+        setProducts(productList);
+        const cats = Array.from(
+          new Set(productList.map((p: any) => p.category || p.Category?.name).filter(Boolean))
+        ) as string[];
         setCategories(['All', ...cats]);
       } catch (err) {
         console.error('Failed to fetch inventory', err);
@@ -44,11 +64,68 @@ export default function InventoryPage() {
     fetchInventory();
   }, []);
 
+  useEffect(() => {
+    if (editProduct) {
+      setFormState({
+        name: editProduct.name || '',
+        slug: editProduct.slug || '',
+        category: editProduct.category || (editProduct as any).Category?.name || '',
+        price: editProduct.price || (editProduct as any).basePrice || 0,
+        originalPrice: editProduct.originalPrice || 0,
+        stock: editProduct.stock || 0,
+        badge: editProduct.badge || '',
+        description: editProduct.description || '',
+        sizes: editProduct.variants?.sizes?.join(', ') || '',
+        tags: editProduct.tags?.join(', ') || '',
+      });
+      const firstImage = editProduct.images?.[0];
+      const imgUrl = typeof firstImage === 'object' ? (firstImage as any).imageUrl || (firstImage as any).url : firstImage;
+      setImagePreview(imgUrl || '');
+      setSelectedImageFile(null);
+    } else {
+      setFormState({
+        name: '',
+        slug: '',
+        category: '',
+        price: 0,
+        originalPrice: 0,
+        stock: 0,
+        badge: '',
+        description: '',
+        sizes: '',
+        tags: '',
+      });
+      setImagePreview('');
+      setSelectedImageFile(null);
+    }
+  }, [editProduct]);
+
+  useEffect(() => {
+    if (showAddForm) {
+      setEditProduct(null);
+      setFormState({
+        name: '',
+        slug: '',
+        category: '',
+        price: 0,
+        originalPrice: 0,
+        stock: 0,
+        badge: '',
+        description: '',
+        sizes: '',
+        tags: '',
+      });
+      setImagePreview('');
+      setSelectedImageFile(null);
+    }
+  }, [showAddForm]);
+
   const filtered = products.filter((p) => {
+    const categoryName = p.category || (p as any).Category?.name || 'Uncategorized';
     const matchSearch =
       p.name.toLowerCase().includes(search.toLowerCase()) ||
-      p.category.toLowerCase().includes(search.toLowerCase());
-    const matchCat = categoryFilter === 'All' || p.category === categoryFilter;
+      categoryName.toLowerCase().includes(search.toLowerCase());
+    const matchCat = categoryFilter === 'All' || categoryName === categoryFilter;
     return matchSearch && matchCat;
   });
 
@@ -78,14 +155,51 @@ export default function InventoryPage() {
     }
   };
 
-  const saveEdit = async (updated: InventoryProduct) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
+
+  const saveEdit = async () => {
     try {
-      if (updated.id) {
-        await api.put(`/admin/products/${updated.id}`, updated);
-        setProducts((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
+      const formData = new FormData();
+      formData.append('name', formState.name);
+      formData.append('slug', formState.slug);
+      formData.append('category', formState.category);
+      formData.append('basePrice', String(formState.price));
+      formData.append('price', String(formState.price));
+      if (formState.originalPrice) {
+        formData.append('originalPrice', String(formState.originalPrice));
+      }
+      formData.append('stock', String(formState.stock));
+      formData.append('badge', formState.badge);
+      formData.append('description', formState.description);
+      
+      const parsedTags = formState.tags.split(',').map(t => t.trim()).filter(Boolean);
+      const parsedSizes = formState.sizes.split(',').map(s => s.trim()).filter(Boolean);
+      
+      formData.append('tags', JSON.stringify(parsedTags));
+      formData.append('variants', JSON.stringify({ sizes: parsedSizes }));
+
+      if (selectedImageFile) {
+        formData.append('images', selectedImageFile);
+      }
+
+      if (editProduct) {
+        const res = await api.put(`/admin/products/${editProduct.id}`, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        const updated = res.data?.product || res.data;
+        setProducts((prev) => prev.map((p) => (p.id === editProduct.id ? { ...p, ...updated } : p)));
       } else {
-        const res = await api.post('/admin/products', updated);
-        setProducts((prev) => [res.data, ...prev]);
+        const res = await api.post('/admin/products', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        const created = res.data?.product || res.data;
+        setProducts((prev) => [created, ...prev]);
       }
       setEditProduct(null);
       setShowAddForm(false);
@@ -267,7 +381,11 @@ export default function InventoryPage() {
                             <div className="flex items-center gap-3">
                               <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-obsidian-300 flex-shrink-0">
                                 <Image
-                                  src={product.images?.[0] || 'https://via.placeholder.com/40'}
+                                  src={
+                                    (typeof product.images?.[0] === 'object'
+                                      ? (product.images[0] as any).imageUrl || (product.images[0] as any).url
+                                      : product.images?.[0]) || 'https://via.placeholder.com/40'
+                                  }
                                   alt={product.name}
                                   fill
                                   className="object-cover"
@@ -283,11 +401,15 @@ export default function InventoryPage() {
                             </div>
                           </td>
                           <td className="px-4 py-3 hidden md:table-cell">
-                            <span className="text-sm text-steel-300">{product.category}</span>
+                            <span className="text-sm text-steel-300">
+                              {product.category || (product as any).Category?.name || 'Uncategorized'}
+                            </span>
                           </td>
                           <td className="px-4 py-3">
                             <div className="flex flex-col">
-                              <span className="font-display font-bold text-white text-sm">${product.price}</span>
+                              <span className="font-display font-bold text-white text-sm">
+                                ${product.price || (product as any).basePrice}
+                              </span>
                               {product.originalPrice && (
                                 <span className="text-xs text-steel-500 line-through">${product.originalPrice}</span>
                               )}
@@ -389,10 +511,13 @@ export default function InventoryPage() {
                     <p className="text-xs font-display font-bold tracking-widest uppercase text-steel-200 mb-2">
                       Product Image
                     </p>
-                    <div className="border-2 border-dashed border-white/15 rounded-xl p-8 flex flex-col items-center justify-center gap-3 hover:border-crimson-500/40 transition-colors cursor-pointer group">
-                      {editProduct?.images?.[0] ? (
+                    <div
+                      onClick={() => fileInputRef.current?.click()}
+                      className="border-2 border-dashed border-white/15 rounded-xl p-8 flex flex-col items-center justify-center gap-3 hover:border-crimson-500/40 transition-colors cursor-pointer group"
+                    >
+                      {imagePreview ? (
                         <div className="relative w-24 h-24 rounded-xl overflow-hidden">
-                          <Image src={editProduct.images[0]} alt="" fill className="object-cover" sizes="96px" />
+                          <Image src={imagePreview} alt="" fill className="object-cover" sizes="96px" />
                         </div>
                       ) : (
                         <Upload size={24} className="text-steel-500 group-hover:text-crimson-400 transition-colors" />
@@ -401,7 +526,14 @@ export default function InventoryPage() {
                         Drop image here or <span className="text-crimson-400">browse</span>
                       </p>
                       <p className="text-[10px] text-steel-500">WebP, PNG, JPG · Max 5MB</p>
-                      <input type="file" accept="image/*" className="hidden" aria-label="Upload product image" />
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileChange}
+                        className="hidden"
+                        aria-label="Upload product image"
+                      />
                     </div>
                   </div>
 
@@ -418,7 +550,8 @@ export default function InventoryPage() {
                       <input
                         type="text"
                         placeholder={placeholder}
-                        defaultValue={editProduct ? String(editProduct[key as keyof Product] || '') : ''}
+                        value={formState[key as keyof typeof formState] || ''}
+                        onChange={(e) => setFormState(prev => ({ ...prev, [key]: e.target.value }))}
                         className="w-full glass border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-steel-400 focus:outline-none focus:border-crimson-500 transition-all"
                       />
                     </div>
@@ -438,7 +571,8 @@ export default function InventoryPage() {
                         </label>
                         <input
                           type={type}
-                          defaultValue={editProduct ? String(editProduct[key as keyof Product] || '') : ''}
+                          value={formState[key as keyof typeof formState] || ''}
+                          onChange={(e) => setFormState(prev => ({ ...prev, [key]: type === 'number' ? Number(e.target.value) : e.target.value }))}
                           className="w-full glass border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-crimson-500 transition-all"
                         />
                       </div>
@@ -452,7 +586,8 @@ export default function InventoryPage() {
                     </label>
                     <textarea
                       rows={4}
-                      defaultValue={editProduct?.description || ''}
+                      value={formState.description || ''}
+                      onChange={(e) => setFormState(prev => ({ ...prev, description: e.target.value }))}
                       className="w-full glass border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-steel-400 focus:outline-none focus:border-crimson-500 transition-all resize-none"
                       placeholder="Product description..."
                     />
@@ -468,7 +603,8 @@ export default function InventoryPage() {
                         <label className="text-xs text-steel-300 block mb-1">Sizes (comma-separated)</label>
                         <input
                           type="text"
-                          defaultValue={editProduct?.variants?.sizes?.join(', ') || ''}
+                          value={formState.sizes || ''}
+                          onChange={(e) => setFormState(prev => ({ ...prev, sizes: e.target.value }))}
                           placeholder="XS, S, M, L, XL"
                           className="w-full bg-transparent border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-crimson-500 transition-all"
                         />
@@ -477,7 +613,8 @@ export default function InventoryPage() {
                         <label className="text-xs text-steel-300 block mb-1">Tags (comma-separated)</label>
                         <input
                           type="text"
-                          defaultValue={editProduct?.tags?.join(', ') || ''}
+                          value={formState.tags || ''}
+                          onChange={(e) => setFormState(prev => ({ ...prev, tags: e.target.value }))}
                           placeholder="new, limited, bestseller"
                           className="w-full bg-transparent border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-crimson-500 transition-all"
                         />
@@ -497,14 +634,7 @@ export default function InventoryPage() {
                   <motion.button
                     whileHover={{ scale: 1.02, boxShadow: '0 0 20px rgba(255,0,0,0.4)' }}
                     whileTap={{ scale: 0.98 }}
-                    onClick={() => {
-                      if (editProduct || showAddForm) {
-                         const payload = editProduct || { id: '', name: 'New Product' }; // Replace with actual form state in real app
-                         saveEdit(payload as any);
-                      } else {
-                        setShowAddForm(false);
-                      }
-                    }}
+                    onClick={saveEdit}
                     className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-crimson-500 rounded-xl text-sm font-display font-bold text-white hover:bg-crimson-600 transition-all shadow-glow-sm"
                   >
                     <Save size={15} /> Save Product
