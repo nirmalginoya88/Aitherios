@@ -27,7 +27,7 @@ const createProduct = async (req, res) => {
         const images = req.files;
 
         const stockQuantity = stock ? parseInt(stock) : 0;
-        
+
         // Resolve category string to categoryId
         let categoryId = null;
         if (category) {
@@ -147,6 +147,34 @@ const getProducts = async (req, res) => {
     } catch (error) {
         console.error('Error fetching products:', error);
         res.status(500).json({ success: false, message: 'Failed to fetch products' });
+    }
+};
+
+const getProduct = async (req, res) => {
+    try {
+        const { name } = req.params;
+        const product = await Product.findOne({
+            where: { name },
+            include: [
+                {
+                    model: ProductImage,
+                    as: 'images'
+                },
+                {
+                    model: ProductVariation,
+                    as: 'variations'
+                },
+                {
+                    model: Category,
+                    as: 'category'
+                }
+            ]
+        });
+        const mappedProduct = mapProductResponse(product);
+        res.status(200).json({ success: true, product: mappedProduct });
+    } catch (error) {
+        console.error('Error fetching product:', error);
+        res.status(500).json({ success: false, message: 'Failed to fetch product' });
     }
 };
 
