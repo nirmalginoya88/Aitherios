@@ -31,13 +31,21 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
             allowNull: false
         },
+        slug: {
+            type: DataTypes.STRING,
+            allowNull: true
+        },
         description: {
             type: DataTypes.TEXT,
             allowNull: true
         },
-        basePrice: {
+        price: {
             type: DataTypes.DECIMAL(10, 2),
             allowNull: false
+        },
+        discountedPrice: {
+            type: DataTypes.DECIMAL(10, 2),
+            allowNull: true
         },
         categoryId: {
             type: DataTypes.INTEGER,
@@ -46,6 +54,19 @@ module.exports = (sequelize, DataTypes) => {
                 model: 'Categories',
                 key: 'id'
             }
+        },
+        stockQuantity: {
+            type: DataTypes.INTEGER,
+            allowNull: false
+        },
+        badge: {
+            type: DataTypes.STRING,
+            allowNull: true
+        },
+        variantGroups: {
+            type: DataTypes.JSON,
+            allowNull: true,
+            defaultValue: []
         },
         tags: {
             type: DataTypes.JSON,
