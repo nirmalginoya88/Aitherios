@@ -41,8 +41,7 @@ export default function InventoryPage() {
     sizes: '',
     tags: '',
   });
-  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string>('');
+  const [imagePreviews, setImagePreviews] = useState<{ file?: File; url: string }[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -78,10 +77,11 @@ export default function InventoryPage() {
         sizes: editProduct.variants?.sizes?.join(', ') || '',
         tags: editProduct.tags?.join(', ') || '',
       });
-      const firstImage = editProduct.images?.[0];
-      const imgUrl = typeof firstImage === 'object' ? (firstImage as any).imageUrl || (firstImage as any).url : firstImage;
-      setImagePreview(imgUrl || '');
-      setSelectedImageFile(null);
+      const existing = (editProduct.images || []).map((img) => {
+        const url = typeof img === 'object' ? (img as any).imageUrl || (img as any).url : img;
+        return { url };
+      });
+      setImagePreviews(existing);
     } else {
       setFormState({
         name: '',
@@ -95,8 +95,7 @@ export default function InventoryPage() {
         sizes: '',
         tags: '',
       });
-      setImagePreview('');
-      setSelectedImageFile(null);
+      setImagePreviews([]);
     }
   }, [editProduct]);
 
@@ -115,8 +114,7 @@ export default function InventoryPage() {
         sizes: '',
         tags: '',
       });
-      setImagePreview('');
-      setSelectedImageFile(null);
+      setImagePreviews([]);
     }
   }, [showAddForm]);
 
@@ -156,11 +154,16 @@ export default function InventoryPage() {
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setSelectedImageFile(file);
-      setImagePreview(URL.createObjectURL(file));
-    }
+    const files = Array.from(e.target.files || []);
+    const newPreviews = files.map((file) => ({
+      file,
+      url: URL.createObjectURL(file),
+    }));
+    setImagePreviews((prev) => [...prev, ...newPreviews]);
+  };
+
+  const removeImage = (index: number) => {
+    setImagePreviews((prev) => prev.filter((_, i) => i !== index));
   };
 
   const saveEdit = async () => {
@@ -184,9 +187,16 @@ export default function InventoryPage() {
       formData.append('tags', JSON.stringify(parsedTags));
       formData.append('variants', JSON.stringify({ sizes: parsedSizes }));
 
-      if (selectedImageFile) {
-        formData.append('images', selectedImageFile);
-      }
+      // Send list of kept existing images
+      const existingImages = imagePreviews.filter((img) => !img.file).map((img) => img.url);
+      formData.append('existingImages', JSON.stringify(existingImages));
+
+      // Append new files
+      imagePreviews.forEach((item) => {
+        if (item.file) {
+          formData.append('images', item.file);
+        }
+      });
 
       if (editProduct) {
         const res = await api.put(`/admin/products/${editProduct.id}`, formData, {
@@ -506,33 +516,55 @@ export default function InventoryPage() {
 
                 {/* Form */}
                 <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5 no-scrollbar">
-                  {/* Image upload placeholder */}
+                  {/* Image upload manager */}
                   <div>
                     <p className="text-xs font-display font-bold tracking-widest uppercase text-steel-200 mb-2">
-                      Product Image
+                      Product Images (Unlimited, Ordered)
                     </p>
+                    
+                    {imagePreviews.length > 0 && (
+                      <div className="grid grid-cols-3 gap-3 mb-4">
+                        {imagePreviews.map((img, idx) => (
+                          <div key={idx} className="relative group aspect-square rounded-xl overflow-hidden border border-white/10 bg-obsidian-300">
+                            <Image src={img.url} alt={`Preview ${idx + 1}`} fill className="object-cover" sizes="120px" />
+                            {idx === 0 && (
+                              <span className="absolute top-1 left-1 bg-crimson-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">
+                                Cover
+                              </span>
+                            )}
+                            <button
+                              type="button"
+                              onClick={(e) => { e.stopPropagation(); removeImage(idx); }}
+                              className="absolute top-1 right-1 w-6 h-6 bg-black/60 hover:bg-red-600 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                              aria-label="Remove image"
+                            >
+                              <X size={12} />
+                            </button>
+                            <span className="absolute bottom-1 right-1 bg-black/60 text-white text-[9px] px-1.5 py-0.5 rounded">
+                              #{idx + 1}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
                     <div
                       onClick={() => fileInputRef.current?.click()}
-                      className="border-2 border-dashed border-white/15 rounded-xl p-8 flex flex-col items-center justify-center gap-3 hover:border-crimson-500/40 transition-colors cursor-pointer group"
+                      className="border-2 border-dashed border-white/15 rounded-xl p-6 flex flex-col items-center justify-center gap-2 hover:border-crimson-500/40 transition-colors cursor-pointer group"
                     >
-                      {imagePreview ? (
-                        <div className="relative w-24 h-24 rounded-xl overflow-hidden">
-                          <Image src={imagePreview} alt="" fill className="object-cover" sizes="96px" />
-                        </div>
-                      ) : (
-                        <Upload size={24} className="text-steel-500 group-hover:text-crimson-400 transition-colors" />
-                      )}
+                      <Upload size={20} className="text-steel-500 group-hover:text-crimson-400 transition-colors" />
                       <p className="text-xs text-steel-400 group-hover:text-steel-300 transition-colors">
-                        Drop image here or <span className="text-crimson-400">browse</span>
+                        Add <span className="text-crimson-400">images</span>
                       </p>
-                      <p className="text-[10px] text-steel-500">WebP, PNG, JPG · Max 5MB</p>
+                      <p className="text-[10px] text-steel-500">Supports selecting multiple files</p>
                       <input
                         ref={fileInputRef}
                         type="file"
                         accept="image/*"
+                        multiple
                         onChange={handleFileChange}
                         className="hidden"
-                        aria-label="Upload product image"
+                        aria-label="Upload product images"
                       />
                     </div>
                   </div>

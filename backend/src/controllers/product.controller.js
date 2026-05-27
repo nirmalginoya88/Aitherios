@@ -248,32 +248,43 @@ const updateProduct = async (req, res) => {
             }
         }
 
-        // Update images if new ones are provided
-        if (images && images.length > 0) {
-            // Delete existing images from Cloudinary
-            const existingImages = await ProductImage.findAll({ where: { productId: id } });
-            for (const image of existingImages) {
-                if (image.publicId) {
+        // Update images (retaining existing ones that were not removed, uploading new ones)
+        let retainedUrls = [];
+        if (req.body.existingImages) {
+            try {
+                retainedUrls = typeof req.body.existingImages === 'string'
+                    ? JSON.parse(req.body.existingImages)
+                    : req.body.existingImages;
+            } catch (e) {
+                console.error('Error parsing existingImages:', e);
+            }
+        }
+
+        const allExistingImages = await ProductImage.findAll({ where: { productId: id } });
+
+        // Delete images that are no longer kept
+        for (const img of allExistingImages) {
+            if (!retainedUrls.includes(img.imageUrl)) {
+                if (img.publicId) {
                     try {
-                        await deleteImage(image.publicId);
+                        await deleteImage(img.publicId);
                     } catch (err) {
                         console.error('Cloudinary deletion failed:', err);
                     }
                 }
+                await img.destroy();
             }
+        }
 
-            // Delete existing records from database
-            await ProductImage.destroy({ where: { productId: id } });
-
-            // Upload new images to Cloudinary
-            const imageUrls = [];
+        // Upload new images to Cloudinary (if any are sent)
+        if (images && images.length > 0) {
+            const newImageUrls = [];
             for (const image of images) {
                 const result = await uploadImage(image.path);
-                imageUrls.push({
+                newImageUrls.push({
                     url: result.secure_url,
                     publicId: result.public_id
                 });
-                // Delete the local file
                 try {
                     fs.unlinkSync(image.path);
                 } catch (err) {
@@ -281,15 +292,25 @@ const updateProduct = async (req, res) => {
                 }
             }
 
-            // Save new image records to database
-            for (let i = 0; i < imageUrls.length; i++) {
+            // Save new images
+            for (const img of newImageUrls) {
                 await ProductImage.create({
                     productId: product.id,
-                    imageUrl: imageUrls[i].url,
-                    publicId: imageUrls[i].publicId,
-                    isPrimary: i === 0
+                    imageUrl: img.url,
+                    publicId: img.publicId,
+                    isPrimary: false
                 });
             }
+        }
+
+        // Re-query all images for this product, sort/order them, and ensure exactly one primary
+        const finalImages = await ProductImage.findAll({
+            where: { productId: id },
+            order: [['createdAt', 'ASC']]
+        });
+
+        for (let i = 0; i < finalImages.length; i++) {
+            await finalImages[i].update({ isPrimary: i === 0 });
         }
 
         // Update variations if provided
