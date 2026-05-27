@@ -18,8 +18,9 @@ function createTransporter() {
 // ── Step 1: Generate OTP, save to DB, send email ─────────────────────────────
 
 async function forgotPassword(email) {
+    const normalizedEmail = email.trim().toLowerCase();
     // Silently succeed if user not found (don't leak existence)
-    const user = await User.findOne({ where: { email } });
+    const user = await User.findOne({ where: { email: normalizedEmail } });
     if (!user) return; // Return silently — don't throw
 
     const otp = Math.floor(1000 + Math.random() * 9000).toString();
@@ -33,7 +34,7 @@ async function forgotPassword(email) {
     const transporter = createTransporter();
     transporter.sendMail({
         from: `"Aitherios" <${process.env.EMAIL_USER}>`,
-        to: email,
+        to: normalizedEmail,
         subject: 'Your Aitherios Password Reset Code',
         html: `
             <div style="font-family: sans-serif; max-width: 480px; margin: auto;">
@@ -55,7 +56,8 @@ async function forgotPassword(email) {
 // ── Step 2: Verify OTP → return short-lived reset JWT ────────────────────────
 
 async function verifyOtp(email, otp) {
-    const user = await User.findOne({ where: { email } });
+    const normalizedEmail = email.trim().toLowerCase();
+    const user = await User.findOne({ where: { email: normalizedEmail } });
     if (!user || !user.otp) throw new Error('Invalid or expired code.');
 
     // Check expiry
