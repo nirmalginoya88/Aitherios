@@ -1,15 +1,24 @@
+const db = require('../models');
+const Product = db.Product;
+const ProductImage = db.ProductImage;
+const ProductVariation = db.ProductVariation;
+const { uploadImage, deleteImage } = require('../utils/cloudinary');
+const fs = require('fs');
+
+// Create Product
 const createProduct = async (req, res) => {
     try {
-        const { name, description, basePrice, categoryId, tags } = req.body;
+        const { name, description, price, categoryId, tags, stockQuantity } = req.body;
         const images = req.files;
 
         // Create product
         const product = await Product.create({
             name,
             description,
-            basePrice,
+            price,
             categoryId,
-            tags
+            tags,
+            stockQuantity
         });
 
         // Upload images to Cloudinary and save to database
@@ -64,7 +73,7 @@ const getProducts = async (req, res) => {
 
 const updateProduct = async (req, res) => {
     try {
-        const { name, description, basePrice, categoryId, tags } = req.body;
+        const { name, description, price, categoryId, tags } = req.body;
         const images = req.files;
         const { id } = req.params;
 
@@ -77,7 +86,7 @@ const updateProduct = async (req, res) => {
         // Update product fields
         product.name = name || product.name;
         product.description = description || product.description;
-        product.basePrice = basePrice || product.basePrice;
+        product.price = price || product.price;
         product.categoryId = categoryId || product.categoryId;
         product.tags = tags || product.tags;
 
