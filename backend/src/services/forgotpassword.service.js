@@ -29,9 +29,9 @@ async function forgotPassword(email) {
     user.otpExpiredAt = otpExpiredAt;
     await user.save();
 
-    // Send the email
+    // Send the email asynchronously in the background so the HTTP response is instant
     const transporter = createTransporter();
-    await transporter.sendMail({
+    transporter.sendMail({
         from: `"Aitherios" <${process.env.EMAIL_USER}>`,
         to: email,
         subject: 'Your Aitherios Password Reset Code',
@@ -45,6 +45,8 @@ async function forgotPassword(email) {
                 <p style="color: #666; font-size: 13px;">If you didn't request this, you can safely ignore this email.</p>
             </div>
         `,
+    }).catch(err => {
+        console.error('[Email Send Error]:', err.message);
     });
 }
 
