@@ -52,11 +52,23 @@ export default function ProductDetail({
           api.get(`/products/${slug}`),
           api.get(`/products?category=related&slug=${slug}&limit=4`) // Example related endpoint
         ]);
-        const productData = prodRes.data?.product || prodRes.data;
+        const raw = prodRes.data?.product || prodRes.data;
+        // Normalize images: backend may return objects {imageUrl} or plain strings
+        const normalizedImages = (raw?.images || []).map((img: any) =>
+          typeof img === 'string' ? img : img?.imageUrl || img?.url || ''
+        ).filter(Boolean);
+        const productData = {
+          ...raw,
+          images: normalizedImages,
+          rating: raw?.rating ?? 0,
+          reviews: raw?.reviews ?? 0,
+          stock: raw?.stock ?? raw?.stockQuantity ?? 0,
+          variants: raw?.variants || { sizes: [], colors: [] },
+        };
         setProduct(productData);
         setRelated(relRes.data?.products || relRes.data || []);
-        if (productData?.variants?.sizes?.length) setSelectedSize(productData.variants.sizes[0]);
-        if (productData?.variants?.colors?.length) setSelectedColor(productData.variants.colors[0].name);
+        if (productData.variants?.sizes?.length) setSelectedSize(productData.variants.sizes[0]);
+        if (productData.variants?.colors?.length) setSelectedColor(productData.variants.colors[0].name);
       } catch (err) {
         console.error('Failed to fetch product');
       } finally {
@@ -72,7 +84,7 @@ export default function ProductDetail({
       productId: product.id,
       name: product.name,
       price: product.price,
-      image: product.images[0],
+      image: product.images?.[0] || '',
       qty,
       size: selectedSize,
       color: selectedColor,
@@ -81,6 +93,7 @@ export default function ProductDetail({
     setTimeout(() => setAdded(false), 2000);
   };
 
+  const images = product?.images?.length ? product.images : ['https://placehold.co/600x600/111/333?text=No+Image'];
   const discount = product?.originalPrice
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : null;
@@ -152,7 +165,7 @@ export default function ProductDetail({
                     className="absolute inset-0"
                   >
                     <Image
-                      src={product.images[imgIndex]}
+                      src={images[imgIndex] || images[0]}
                       alt={`${product.name} view ${imgIndex + 1}`}
                       fill
                       className="object-cover"
@@ -163,11 +176,11 @@ export default function ProductDetail({
                 </AnimatePresence>
 
                 {/* Prev/Next */}
-                {product.images.length > 1 && (
+                {images.length > 1 && (
                   <>
                     <button
                       onClick={() =>
-                        setImgIndex((i) => (i - 1 + product.images.length) % product.images.length)
+                        setImgIndex((i) => (i - 1 + images.length) % images.length)
                       }
                       className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 glass rounded-full flex items-center justify-center text-white hover:bg-white/10 transition-all"
                       aria-label="Previous image"
@@ -176,7 +189,7 @@ export default function ProductDetail({
                     </button>
                     <button
                       onClick={() =>
-                        setImgIndex((i) => (i + 1) % product.images.length)
+                        setImgIndex((i) => (i + 1) % images.length)
                       }
                       className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 glass rounded-full flex items-center justify-center text-white hover:bg-white/10 transition-all"
                       aria-label="Next image"
@@ -195,9 +208,9 @@ export default function ProductDetail({
               </div>
 
               {/* Thumbnails */}
-              {product.images.length > 1 && (
+              {images.length > 1 && (
                 <div className="flex gap-3">
-                  {product.images.map((img, i) => (
+                  {images.map((img, i) => (
                     <button
                       key={i}
                       onClick={() => setImgIndex(i)}
@@ -241,7 +254,7 @@ export default function ProductDetail({
 
               {/* Rating */}
               <motion.div variants={fadeUp} className="flex items-center gap-3">
-                <div className="flex" aria-label={`Rating: ${product.rating} out of 5`}>
+                <div className="flex" aria-label={`Rating: ${product.rating || 0} out of 5`}>
                   {[1, 2, 3, 4, 5].map((s) => (
                     <Star
                       key={s}
@@ -278,7 +291,7 @@ export default function ProductDetail({
               </motion.p>
 
               {/* Color selector */}
-              {product.variants.colors && (
+              {product.variants?.colors && product.variants.colors.length > 0 && (
                 <motion.div variants={fadeUp}>
                   <p className="text-xs font-display font-bold tracking-widest uppercase text-steel-200 mb-3">
                     Color: <span className="text-white">{selectedColor}</span>
@@ -304,7 +317,7 @@ export default function ProductDetail({
               )}
 
               {/* Size selector */}
-              {product.variants.sizes && (
+              {product.variants?.sizes && product.variants.sizes.length > 0 && (
                 <motion.div variants={fadeUp}>
                   <div className="flex items-center justify-between mb-3">
                     <p className="text-xs font-display font-bold tracking-widest uppercase text-steel-200">

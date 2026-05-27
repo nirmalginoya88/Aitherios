@@ -10,13 +10,33 @@ const fs = require('fs');
 const mapProductResponse = (product) => {
     if (!product) return null;
     const json = product.toJSON ? product.toJSON() : product;
+
+    // Flatten images to plain URL strings (frontend expects string[])
+    const imageUrls = (json.images || [])
+        .sort((a, b) => (b.isPrimary ? 1 : 0) - (a.isPrimary ? 1 : 0))
+        .map(img => img.imageUrl || img.url)
+        .filter(Boolean);
+
     return {
-        ...json,
-        stock: json.stockQuantity,
+        id: json.id,
+        name: json.name,
+        slug: json.slug || json.name?.toLowerCase().replace(/\s+/g, '-'),
+        description: json.description || '',
+        price: parseFloat(json.price) || 0,
+        originalPrice: json.discountedPrice ? parseFloat(json.price) : undefined,
+        stock: json.stockQuantity ?? 0,
         category: json.category?.name || 'Uncategorized',
+        tags: json.tags || [],
+        badge: json.badge || '',
+        rating: json.rating || 4.5,
+        reviews: json.reviews || 0,
+        featured: json.featured || false,
+        images: imageUrls,
         variants: {
-            sizes: json.variations ? json.variations.map(v => v.name) : []
-        }
+            sizes: json.variations ? json.variations.map(v => v.name) : [],
+        },
+        createdAt: json.createdAt,
+        updatedAt: json.updatedAt,
     };
 };
 

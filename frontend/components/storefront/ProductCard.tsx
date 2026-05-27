@@ -20,13 +20,21 @@ export default function ProductCard({ product, onAddToCart, loading = false }: P
   const [hovered, setHovered] = useState(false);
   const [added, setAdded] = useState(false);
 
+  // Normalize images: handle both string[] and object[] from backend
+  const heroImage = (() => {
+    const img = product.images?.[0];
+    if (!img) return 'https://placehold.co/400x400/111/333?text=No+Image';
+    if (typeof img === 'string') return img;
+    return (img as any).imageUrl || (img as any).url || 'https://placehold.co/400x400/111/333?text=No+Image';
+  })();
+
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     onAddToCart({
       productId: product.id,
       name: product.name,
       price: product.price,
-      image: product.images[0],
+      image: heroImage,
       qty: 1,
       size: product.variants.sizes?.[0],
       color: product.variants.colors?.[0]?.name,
@@ -65,7 +73,7 @@ export default function ProductCard({ product, onAddToCart, loading = false }: P
       <Link href={`/products/${product.slug}`} className="block relative overflow-hidden">
         <div className="relative w-full h-72">
           <Image
-            src={product.images[0]}
+            src={heroImage}
             alt={product.name}
             fill
             className={`object-cover transition-transform duration-700 ${hovered ? 'scale-110' : 'scale-100'}`}
