@@ -1,22 +1,6 @@
 const { User } = require('../models');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const nodemailer = require('nodemailer');
-
-// ── Helpers ──────────────────────────────────────────────────────────────────
-
-function createTransporter() {
-    return nodemailer.createTransport({
-        host: 'smtp.gmail.com',
-        port: 587,
-        secure: false, // use STARTTLS
-        family: 4,     // Force IPv4 to prevent ENETUNREACH on IPv6
-        auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASSWORD,
-        },
-    });
-}
 
 // ── Step 1: Generate OTP, save to DB, send email ─────────────────────────────
 
@@ -33,26 +17,45 @@ async function forgotPassword(email) {
     user.otpExpiredAt = otpExpiredAt;
     await user.save();
 
-    // Send the email asynchronously in the background so the HTTP response is instant
-    const transporter = createTransporter();
-    transporter.sendMail({
-        from: `"Aitherios" <${process.env.EMAIL_USER}>`,
-        to: normalizedEmail,
-        subject: 'Your Aitherios Password Reset Code',
-        html: `
-            <div style="font-family: sans-serif; max-width: 480px; margin: auto;">
-                <h2 style="color: #dc2626;">Aitherios Password Reset</h2>
-                <p>Use the code below to reset your password. It expires in <strong>10 minutes</strong>.</p>
-                <div style="font-size: 36px; font-weight: bold; letter-spacing: 12px; color: #dc2626; margin: 24px 0;">
-                    ${otp}
+    // Send the email asynchronously in the background via Resend HTTP API
+    const apiKey = process.env.RESEND_API_KEY;
+    if (!apiKey) {
+        console.error('[Email Send Error]: RESEND_API_KEY is not defined in environment variables.');
+        return;
+    }
+
+    fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            from: 'Aitherios <onboarding@resend.dev>',
+            to: normalizedEmail,
+            subject: 'Your Aitherios Password Reset Code',
+            html: `
+                <div style="font-family: sans-serif; max-width: 480px; margin: auto;">
+                    <h2 style="color: #dc2626;">Aitherios Password Reset</h2>
+                    <p>Use the code below to reset your password. It expires in <strong>10 minutes</strong>.</p>
+                    <div style="font-size: 36px; font-weight: bold; letter-spacing: 12px; color: #dc2626; margin: 24px 0;">
+                        ${otp}
+                    </div>
+                    <p style="color: #666; font-size: 13px;">If you didn't request this, you can safely ignore this email.</p>
                 </div>
-                <p style="color: #666; font-size: 13px;">If you didn't request this, you can safely ignore this email.</p>
-            </div>
-        `,
-    }).then(info => {
-        console.log('[Email Sent Successfully]:', info.messageId);
-    }).catch(err => {
-        console.error('[Email Send Error]:', err.message);
+            `,
+        }),
+    })
+    .then(async (response) => {
+        const data = await response.json();
+        if (response.ok) {
+            console.log('[Email Sent Successfully via Resend]:', data.id);
+        } else {
+            console.error('[Email Send Error via Resend]:', data.message || JSON.stringify(data));
+        }
+    })
+    .catch((err) => {
+        console.error('[Email Send Error via Resend]:', err.message);
     });
 }
 
