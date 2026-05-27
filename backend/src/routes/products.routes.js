@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { createProduct, getProducts, updateProduct, deleteProduct } = require('../controllers/product.controller');
+const { createProduct, getProducts, getProduct, updateProduct, deleteProduct } = require('../controllers/product.controller');
 const { upload } = require('../middleware/multer.middleware');
 const { protect, adminOnly } = require('../middleware/auth.middleware');
 
