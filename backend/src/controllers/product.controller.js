@@ -8,8 +8,14 @@ const fs = require('fs');
 // Create Product
 const createProduct = async (req, res) => {
     try {
-        const { name, description, price, categoryId, tags, stockQuantity } = req.body;
+        const { name, description, price, categoryId, tags, stock } = req.body;
         const images = req.files;
+
+        const stockQuantity = parseInt(stock);
+
+        if (categoryId === "Footwear"){
+            categoryId = 1;            
+        }
 
         // Create product
         const product = await Product.create({
