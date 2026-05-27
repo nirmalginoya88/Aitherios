@@ -52,10 +52,11 @@ export default function ProductDetail({
           api.get(`/products/${slug}`),
           api.get(`/products?category=related&slug=${slug}&limit=4`) // Example related endpoint
         ]);
-        setProduct(prodRes.data);
-        setRelated(relRes.data || []);
-        if (prodRes.data.variants?.sizes?.length) setSelectedSize(prodRes.data.variants.sizes[0]);
-        if (prodRes.data.variants?.colors?.length) setSelectedColor(prodRes.data.variants.colors[0].name);
+        const productData = prodRes.data?.product || prodRes.data;
+        setProduct(productData);
+        setRelated(relRes.data?.products || relRes.data || []);
+        if (productData?.variants?.sizes?.length) setSelectedSize(productData.variants.sizes[0]);
+        if (productData?.variants?.colors?.length) setSelectedColor(productData.variants.colors[0].name);
       } catch (err) {
         console.error('Failed to fetch product');
       } finally {

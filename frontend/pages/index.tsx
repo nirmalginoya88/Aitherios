@@ -52,8 +52,8 @@ export default function Home({ cart, onCartUpdate, addToCart }: HomeProps) {
           api.get('/products?featured=true'),
           api.get('/products?limit=8')
         ]);
-        setFeatured(featuredRes.data);
-        setGridProducts(gridRes.data);
+        setFeatured(featuredRes.data?.products || featuredRes.data || []);
+        setGridProducts(gridRes.data?.products || gridRes.data || []);
       } catch (err) {
         console.error('Failed to fetch home products', err);
       } finally {

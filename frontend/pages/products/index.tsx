@@ -45,7 +45,7 @@ export default function ProductsPage({ cart, onCartUpdate, addToCart }: Products
     const fetchProducts = async () => {
       try {
         const res = await api.get('/products');
-        setProducts(res.data || []);
+        setProducts(res.data?.products || res.data || []);
       } catch (err) {
         console.error('Failed to fetch products', err);
       } finally {
