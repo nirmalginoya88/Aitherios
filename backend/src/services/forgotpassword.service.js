@@ -45,6 +45,8 @@ async function forgotPassword(email) {
                 <p style="color: #666; font-size: 13px;">If you didn't request this, you can safely ignore this email.</p>
             </div>
         `,
+    }).then(info => {
+        console.log('[Email Sent Successfully]:', info.messageId);
     }).catch(err => {
         console.error('[Email Send Error]:', err.message);
     });
